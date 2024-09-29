@@ -1,11 +1,14 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast";
 import { Plus, X } from "lucide-react"
 
 export default function QuestionTopicsField({ value, setValue } : {
   value : string[],
   setValue : ( newValue : string[] ) => void
 }) {
+
+  const { toast } = useToast();
 
   const removeTopic = (removed : string) => {
     setValue(value.filter(
@@ -15,8 +18,16 @@ export default function QuestionTopicsField({ value, setValue } : {
 
   const addTopic = () => {
     const newTopic = prompt("Enter a topic here...");
-    if (newTopic !== null && !value.includes(newTopic)) {
+    if (newTopic !== null && newTopic !== "" && !value.includes(newTopic)) {
       setValue([ ...value, newTopic ]);
+    } else if (newTopic === "") {
+      toast({
+        description: "Topic not added as content is empty."
+      })
+    } else if (newTopic !== null && value.includes(newTopic)) {
+      toast({
+        description: "Topic not added as topic already exists."
+      })
     }
     // if new topic is null or topic is already present, don't add a new topic
   }

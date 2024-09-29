@@ -6,7 +6,10 @@ import FilterPopover from "@/components/question-service/list-question-page/Filt
 import ListQuestionTable from "@/components/question-service/list-question-page/ListQuestionTable";
 import { Button } from "@/components/ui/button";
 import SearchInput from "@/components/ui/SearchInput";
+import { ToastAction } from "@/components/ui/toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { CircleX, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -18,11 +21,22 @@ export default function ListQuestionPage() {
   const [ difficultyFilter, setDifficultyFilter ] = useState<TDifficulty[]>(["easy", "medium", "hard"]);
   const [ topicFilter, setTopicFilter ] = useState<string[]>([]);
   const [ search, setSearch ] = useState("");
+  const [ loading, setLoading ] = useState(true);
   const { auth } = useAuth();
+  const [ errorMessage, setErrorMessage ] = useState("");
+
+  document.title = `Question List | PeerPrep`;
 
   const updateQuestionTable = () => {
     fetchQuestions().then(questionList => {
-      setQuestions(questionList);
+      setLoading(false);
+      // there was an error loading the questions
+      if (typeof questionList === "string") {
+        setErrorMessage(questionList);
+        setQuestions([]);
+      } else {
+        setQuestions(questionList);
+      }
     });
   }
 
@@ -35,11 +49,16 @@ export default function ListQuestionPage() {
   const [ topics, setTopics ] = useState<string[]>([]);
 
   // set here to remove duplicate topics
-  const fetchTopics = () => fetchQuestions().then(
-    questions => [ ...new Set(
-      questions.flatMap(question => question.topics ?? [])
-    )]
-  )
+  const fetchTopics = () => fetchQuestions().then( questions => {
+    if (typeof questions === "string") {
+      // display of error message is handled in updateQuestionTable
+      return [];
+    } else {
+      return [ ...new Set(
+        questions.flatMap(question => question.topics ?? [])
+      )];
+    }
+  });
 
   // initialise topics and topic filters
   useEffect(() => {
@@ -116,7 +135,16 @@ export default function ListQuestionPage() {
             </Button>
           }
         </div>
-        <ListQuestionTable onDelete={ handleDelete } questions={ filteredQuestions } />
+        <ListQuestionTable loading={loading} onDelete={ handleDelete } questions={ filteredQuestions } />
+        { 
+          (errorMessage !== "") ?
+          <div className="bg-red-200 rounded-lg p-4 flex items-center gap-2 mt-5">
+            <CircleX className="size-8" />
+            <p>
+              <strong>Error loading question list: </strong>{ errorMessage }
+            </p>
+          </div> : <></>
+        }
       </div>
     </>
   );

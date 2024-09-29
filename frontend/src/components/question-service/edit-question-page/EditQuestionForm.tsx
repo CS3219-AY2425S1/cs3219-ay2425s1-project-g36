@@ -9,7 +9,9 @@ import QuestionTextareaField from "./QuestionTextareaField";
 import QuestionSelectField from "./QuestionSelectField";
 import { TDifficulty } from "../Difficulty";
 import QuestionTopicsField from "./QuestionTopicsField";
-import { TriangleAlert } from "lucide-react";
+import { Loader2, TriangleAlert } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * A form for the editing of questions. Requires the following
@@ -21,6 +23,8 @@ import { TriangleAlert } from "lucide-react";
 export default function EditQuestionForm({ id } : { id? : string }) {
   const [ question, setQuestion ] = useState<Question>(EMPTY_QUESTION);
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [ loading, setLoading ] = useState(true);
 
   // whether to perform insert or update. True if adding question, False if
   // updating an existing question.
@@ -29,8 +33,15 @@ export default function EditQuestionForm({ id } : { id? : string }) {
   // load question from backend
   const loadQuestion = () => {
     fetchQuestionById( id ).then(question => {
-      setQuestion(question);
-      console.log(question);
+      setLoading(false);
+      if (question === null) {
+        toast({
+          description: `Redirected to add new question as question with ID ${id} doesn't exist!`
+        });
+        navigate('/questions/new');
+      } else {
+        setQuestion(question);
+      }
     });
   }
 
@@ -68,7 +79,7 @@ export default function EditQuestionForm({ id } : { id? : string }) {
     }
   }
 
-  return (
+  return !loading ? (
     <section>
       <PageTitle>
         { isAddQuestion ?
@@ -123,6 +134,11 @@ export default function EditQuestionForm({ id } : { id? : string }) {
           </div> : <></>
         }
       </div>
-    </section>
-  )
+    </section> 
+  ) : (
+  <div className="flex flex-col items-center justify-center bg-background">
+    <Loader2 className="h-16 w-16 animate-spin text-primary" />
+    <h2 className="text-2xl font-semibold mt-4 text-foreground">Loading...</h2>
+  </div>
+)
 }

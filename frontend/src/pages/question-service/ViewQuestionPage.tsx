@@ -10,6 +10,8 @@ export default function ViewQuestionPage() {
   const id = params.id as string;
   const [question, setQuestion] = useState<Question | null>(null);
 
+  document.title = `View Question #${id} | PeerPrep`;
+
   useEffect(() => {
     const loadQuestion = async () => {
       if (id) {

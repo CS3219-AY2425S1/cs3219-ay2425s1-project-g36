@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp, ArrowUpDown, Eye, Pencil, Trash2 } from "lucide-react";
 import TopicView from "./TopicView";
 import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Converts a column header to make it sortable.
@@ -125,11 +126,12 @@ const getColumns = ( onDelete : (id : string) => void, isAdmin: boolean ) : Colu
 ];
 
 interface DataTableProps<TData, TValue> {
+  loading : boolean;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-function DataTable<TData, TValue>({ columns, data } : DataTableProps<TData, TValue>) {
+function DataTable<TData, TValue>({ loading, columns, data } : DataTableProps<TData, TValue>) {
   const [ sorting, setSorting ] = useState<SortingState>([]);
   const table = useReactTable({ 
     data, 
@@ -164,7 +166,17 @@ function DataTable<TData, TValue>({ columns, data } : DataTableProps<TData, TVal
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          { loading ? (
+            // Loading skeleton
+            [...Array(5)].map((_, index) => (
+              <TableRow key={index}>
+                <TableCell><Skeleton className="h-6" /></TableCell>
+                <TableCell><Skeleton className="h-6" /></TableCell>
+                <TableCell><Skeleton className="h-6" /></TableCell>
+                <TableCell><Skeleton className="h-6" /></TableCell>
+                <TableCell><Skeleton className="h-6" /></TableCell>
+              </TableRow>
+            ))) : table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
@@ -198,10 +210,10 @@ function DataTable<TData, TValue>({ columns, data } : DataTableProps<TData, TVal
  * 
  * @returns The generated table for the ListQuestionPage.
  */
-export default function ListQuestionTable({ onDelete, questions } : { onDelete : (id : string) => void, questions : Question[] }) {
+export default function ListQuestionTable({ loading, onDelete, questions } : { loading : boolean, onDelete : (id : string) => void, questions : Question[] }) {
   const { auth } = useAuth();
   
   return (
-    <DataTable columns={getColumns(onDelete, auth.isAdmin)} data={questions} />
+    <DataTable loading={loading} columns={getColumns(onDelete, auth.isAdmin)} data={questions} />
   )
 }

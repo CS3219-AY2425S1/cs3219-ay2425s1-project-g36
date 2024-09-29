@@ -19,46 +19,49 @@ const api = axios.create({
  * An async function that fetches the question list from the backend question
  * service.
  * 
- * @returns The question list from the question-service as a promise.
+ * @returns The question list from the question-service as a promise. Returns 
+ * an error message as a string if there are any error that occur from fetching
+ * questions.
  */
-export async function fetchQuestions() : Promise<Question[]> {
+export async function fetchQuestions() : Promise<Question[] | string> {
   const data = await api.get('/questions/').then(response => {
     console.log(`questions fetched: ${response.data.data}`)
     return response.data.data;
   }).catch(error => {
     console.error("An error occurred when fetching questions in fetchQuestions():", error);
-    return [];
+    return error.message;
   });
-  return fromQuestionList(data);
+  return (typeof data === "string") ? data : fromQuestionList(data);
 }
 
 /**
  * An async function that fetches a specific question from the backend question
  * service based on the given ID. Returns an empty question if the ID is invalid.
  * 
- * `fetchQuestion()` has the same result but returns `null` for invalid IDs.
+ * `fetchQuestion()` has the same result but does not consider empty IDs.
  * 
  * @param id The ID of the question to fetch, if any.
  * @returns The question within the backend question service if it exists; the
- * `EMPTY_QUESTION` otherwise.
+ * `EMPTY_QUESTION` if `id` is undefined, `null` otherwise.
  */
-export async function fetchQuestionById(id? : string) : Promise<Question> {
+export async function fetchQuestionById(id? : string) : Promise<Question | null> {
   if (id === undefined) return EMPTY_QUESTION;
 
   const data = await api.get('/questions/' + id).then(response => {
     return response.data;
   }).catch(error => {
     console.error("An error occurred when fetching the question with ID " + id + " from fetchQuestionById():", error);
-    return EMPTY_QUESTION;
+    return null;
   })
-  return toQuestionObject(data);
+  return data === null ? null : toQuestionObject(data);
 }
 
 /**
  * An async function that fetches a specific question from the backend question
  * service based on the given ID. Returns `null` if the ID is invalid.
  * 
- * `fetchQuestionById()` has the same result but returns `EMPTY_QUESTION` for invalid IDs.
+ * `fetchQuestionById()` has the same result but returns `EMPTY_QUESTION` when ID is not
+ * provided (for adding of questions).
  * 
  * @param id The ID of the question to fetch, if any.
  * 

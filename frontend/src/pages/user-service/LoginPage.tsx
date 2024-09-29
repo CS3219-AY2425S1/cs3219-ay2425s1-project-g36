@@ -11,6 +11,8 @@ export default function LoginPage() {
     navigate('/');
   }
 
+  document.title="Login | PeerPrep";
+
   return (
     <>
       <p>

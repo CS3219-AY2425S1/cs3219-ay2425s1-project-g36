@@ -8,6 +8,8 @@ export default function EditQuestionPage() {
 
   const id = params.id;
 
+  document.title = `Edit Question #${id} | PeerPrep`;
+
   return (
     <>
       <PageHeader />

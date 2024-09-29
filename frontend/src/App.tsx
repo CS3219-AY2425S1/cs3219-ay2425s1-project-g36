@@ -1,5 +1,4 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
-import MainPage from "./pages/MainPage"
 import LoginPage from "./pages/user-service/LoginPage"
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import EditQuestionPage from "./pages/question-service/EditQuestionPage";
@@ -10,6 +9,7 @@ import ForgotPasswordPage from "./pages/user-service/ForgotPasswordPage";
 import AccountSettingsPage from "./pages/user-service/AccountSettingsPage";
 import ErrorPage from "./pages/ErrorPage";
 import AddQuestionPage from "./pages/question-service/AddQuestionPage";
+import { Toaster } from "./components/ui/toaster";
 
 /**
  * A wrapper around routes that should only be accessed by logged-in users.
@@ -143,6 +143,7 @@ function App() {
           <Route path="*" Component={ ErrorPage } />
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </AuthProvider>
   )
 }

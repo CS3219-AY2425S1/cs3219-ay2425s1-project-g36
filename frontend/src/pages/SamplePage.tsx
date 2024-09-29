@@ -6,9 +6,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 /**
- * @returns Sample main page.
+ * Returns a sample main page. The main page is now the `ListQuestionPage` or `LoginPage`.
+ * 
+ * @returns Sample main page. Currently not used.
  */
-export default function MainPage() {
+export default function SamplePage() {
   const { auth, logout } = useAuth();
   const [count, setCount] = useState(0)
   const navigate = useNavigate();
