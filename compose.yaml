@@ -1,0 +1,23 @@
+services:
+  user:
+    restart: always
+    build:
+      context:
+        ./user-service
+    volumes:
+      - ./user-service:/usr/src/user-service
+      - /usr/src/user-service/node_modules
+    ports:
+      - "4000:4000"
+    container_name: user-service-container
+  question:
+    restart: always
+    build:
+      context:
+        ./question-service
+    volumes:
+      - ./question-service:/usr/src/question-service
+      - /usr/src/question-service/node_modules
+    ports:
+      - "3000:3000"
+    container_name: question-service-container
