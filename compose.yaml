@@ -1,4 +1,14 @@
 services:
+  frontend:
+    build:
+      context:
+        ./frontend
+    volumes:
+      - ./frontend:/usr/src/frontend
+      - /usr/src/frontend/node_modules
+    ports:
+      - "5173:5173"
+    container_name: frontend-container
   user:
     restart: always
     build:
