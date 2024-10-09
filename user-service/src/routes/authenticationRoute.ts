@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express'
-import { User } from '../models/userModel'
+import User from '../models/userModel'
 import { Blacklist } from '../models/blacklistModel'
 import bcrypt from 'bcrypt'
 import jwt, { JwtPayload } from 'jsonwebtoken'
