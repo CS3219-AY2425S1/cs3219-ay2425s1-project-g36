@@ -21,3 +21,14 @@ services:
     ports:
       - "3000:3000"
     container_name: question-service-container
+  matching:
+    restart: always
+    build:
+      context:
+        ./matching-service
+      volumes:
+        - ./matching-service:/usr/src/matching-service
+        - /usr/src/matching-service/node_modules
+      ports:
+        - "5000:5000"
+      container_name: matching-service-container
