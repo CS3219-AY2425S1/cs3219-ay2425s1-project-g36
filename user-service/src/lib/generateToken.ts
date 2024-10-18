@@ -3,11 +3,14 @@ import { Response } from "express";
 import mongoose from "mongoose";
 
 import { JWT_SECRET } from "../../utils/config";
+import User from "../models/userModel";
 
 const generateTokenAndSetCookie = (userId: mongoose.Types.ObjectId, res: Response) => {
-	const token = jwt.sign({ userId }, JWT_SECRET, {
-		expiresIn: "1d",
-	});
+	const token = jwt.sign(
+		{ userId },
+		JWT_SECRET,
+		{ expiresIn: "1d" },
+	);
 
 	res.cookie("jwt", token, {
 		maxAge: 15 * 24 * 60 * 60 * 1000, //MS

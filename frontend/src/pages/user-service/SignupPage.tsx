@@ -14,7 +14,7 @@ export default function SignupPage() {
         <UserServiceCommonContainer title="Join PeerPrep">
           <SignupForm />
           <div className="flex items-center flex-col">
-            <Link to='/login' className="m-1">Already have an account? Login</Link>
+            <Link to='/login' className="m-1">Already have an account? Log in</Link>
             <Link to='/forgot-password' className="m-1">Forgot your password?</Link>
           </div>
         </UserServiceCommonContainer>

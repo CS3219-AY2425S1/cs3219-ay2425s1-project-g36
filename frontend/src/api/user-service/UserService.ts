@@ -2,23 +2,27 @@ import axios from "axios";
 
 
 const USER_SERVICE_URL = "http://localhost:4000";
+const USERS_BASE_URL = "/users";
 const AUTH_BASE_URL = "/authentication";
 const LOGIN_API = "/login";
-const SIGNUP_API = "/signup";
+const SIGNUP_API = "/";
 const RESET_PASSWORD_API = "/forgot-password";
 
-const api = axios.create({baseURL: USER_SERVICE_URL});
+const api = axios.create({
+  baseURL: USER_SERVICE_URL,
+  withCredentials: true
+});
 
 /**
  * An async function for sending a login request to the backend.
- * @param username The username/email address.
+ * @param email The email address.
  * @param password The password.
  * @param captcha The captcha value (when required).
  * @returns An object containing the HTTP status code of the request, the responded message from the backend and the user's information.
  */
-async function sendLoginRequest(username : string, password : string, captcha : string) {
+async function sendLoginRequest(email : string, password : string, captcha : string) {
   const loginData = {
-    email : username,
+    email : email,
     password : password,
     captcha : captcha
   }
@@ -26,8 +30,9 @@ async function sendLoginRequest(username : string, password : string, captcha : 
   {
     const userInfo = {
       token : response.data.token,
-      isAdmin: username === "Admin" ? true : false // TODO: This information should be told by the response from the backend.
-      // TODO: add more user's information retrieved from the backend
+      isAdmin: response.data.isAdmin ? true : false,
+      username: response.data.username,
+      email: response.data.email,
     }
     return {status: response.status, message: response.data.message, userInfo: userInfo};
   }).catch(error =>
@@ -58,23 +63,21 @@ async function sendResetPasswordRequest(emailAddress : string) {
  * @param username The username.
  * @param emailAddress The email address.
  * @param password The password.
- * @param captcha The captcha value (when required).
  * @returns An object containing the HTTP status code of the request and the responded message from the backend.
  */
-async function sendSignupRequest(username : string, emailAddress : string, password : string, captcha : string) {
+async function sendSignupRequest(username : string, emailAddress : string, password : string) {
   const signupData = {
     username : username,
     email : emailAddress,
-    password : password,
-    captcha : captcha
+    password : password
   }
-  return await api.post(AUTH_BASE_URL + SIGNUP_API, signupData).then(response =>
-  {
+
+  try {
+    const response = await api.post(USERS_BASE_URL + SIGNUP_API, signupData);
     return {status: response.status, message: response.data.message};
-  }).catch(error =>
-  {
-    return {status: error.status, message: error.response.data.message};
-  })
+  } catch (error : any) {
+    return {status: error.response.status, message: error.response.data.message};
+  }
 }
 
 export { sendLoginRequest, sendResetPasswordRequest, sendSignupRequest };

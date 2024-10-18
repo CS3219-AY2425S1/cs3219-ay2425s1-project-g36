@@ -8,6 +8,7 @@ interface IUser extends Document {
     numberOfFailedLoginAttempts: number
     passwordResetToken?: string
     passwordResetTokenExpiration?: Date
+    isAdmin: boolean
     // Add more fields as needed
 }
 

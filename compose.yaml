@@ -9,6 +9,11 @@ services:
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     container_name: frontend-container
+    environment:
+      - WDS_SOCKET_HOST=127.0.0.1
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true 
+    command: yarn dev --host 0.0.0.0
   user:
     restart: always
     build:

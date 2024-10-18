@@ -2,7 +2,9 @@ import { useState } from "react";
 import InputFieldWithTip from "./InputFieldWithTip";
 import SignupButton from "./SignupButton";
 import { DisplayedMessage, DisplayedMessageContainer, DisplayedMessageTypes } from "@/components/common/DisplayedMessage";
-import { sendSignupRequest } from "@/api/user-service/UserService";
+import { sendLoginRequest, sendSignupRequest } from "@/api/user-service/UserService";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginForm(){
 
@@ -12,6 +14,9 @@ export default function LoginForm(){
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [confirmPassword, setConfirmPassword] = useState("");
     const [displayedSignupMessage, setDisplayedSignupMessage] = useState<DisplayedMessage | null>(null);
+    const { login } = useAuth();
+
+    const navigate = useNavigate();
 
     const tip_username = "Your username should only contains A-Z, a-z, 0-9 and underscores, and it should be unique among all users.";
     const tip_email = "You can only signup one account per email address."
@@ -74,7 +79,7 @@ export default function LoginForm(){
             return;
         }
         if(!isPasswordValid()){
-            showDisplayedSignupMessage("Invalid password.", DisplayedMessageTypes.Error);
+            showDisplayedSignupMessage("The password set is not secure enough.", DisplayedMessageTypes.Error);
             return;
         }
         if(confirmPassword !== password){
@@ -82,21 +87,34 @@ export default function LoginForm(){
             return;
         }
         showDisplayedSignupMessage("Signing up...", DisplayedMessageTypes.Info);
-        sendSignupRequest(username, emailAddress, password, "") // TODO: captcha logic (after captcha logic is implemented in the backend)
-        .then(response => {
-            const message = response.message;
-            const isSuccess = response.status === 200;
-            const type = isSuccess ? DisplayedMessageTypes.Info : DisplayedMessageTypes.Error;
-            showDisplayedSignupMessage(message, type);
-            if(isSuccess) {
-              // TODO: Show email verification page, or go back to login page, or...? Will implement here after signup login is implemented in the backend.
-            }
-          });
+        sendSignupRequest(username, emailAddress, password) // TODO: captcha logic (after captcha logic is implemented in the backend)
+            .then(response => {
+                const message = response.message;
+                const isSuccess = response.status === 201;
+                const type = isSuccess ? DisplayedMessageTypes.Info : DisplayedMessageTypes.Error;
+                showDisplayedSignupMessage(message, type);
+                if (isSuccess) {
+                    // log user in
+                    sendLoginRequest(emailAddress, password, "").then(response => {
+                        const isLoginSuccess = response.status === 200;
+                        const isAdmin = response.userInfo?.isAdmin;
+                        const email = response.userInfo?.email;
+                        const username = response.userInfo?.username;
+                        const token = response.userInfo?.token;
+                        if(isLoginSuccess) {
+                            login(token, username, email, isAdmin);
+                            navigate("/");
+                        } else {
+                            navigate("/login");
+                        }
+                    });
+                }
+            });
     }
 
     return(
         <>
-          <form onSubmit={evt => {evt.preventDefault(); startSigningUp();}} className="w-3/4">
+          <form onSubmit={evt => {evt.preventDefault();}} className="w-3/4">
             <p className="font-bold mb-1">Username:</p>
             <InputFieldWithTip placeholder="Your username" onChange={setUsername} type="text">
               {!isUsernameValid() && (<div className="text-red-300">Invalid username.</div>)}
@@ -125,7 +143,7 @@ export default function LoginForm(){
               {tip_confirmpassword}
             </InputFieldWithTip>
             <DisplayedMessageContainer displayedMessage={displayedSignupMessage}/>
-            <SignupButton onClick={startSigningUp}/>
+            <SignupButton onClick={ startSigningUp }/>
           </form>
         </>
     )
