@@ -6,6 +6,7 @@ import { DisplayedMessage, DisplayedMessageContainer, DisplayedMessageTypes } fr
 import { sendLoginRequest } from "@/api/user-service/UserService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export default function LoginForm(){
     const { login } = useAuth();
@@ -38,6 +39,9 @@ export default function LoginForm(){
       });
     }
 
+    const backdoor = () => login("", false);
+    const backdoorAdmin = () => login("", true);
+
     const startLoggingIn = () => loginWithCredentials(username, password, ""); // captcha todo
     
     return(
@@ -47,6 +51,12 @@ export default function LoginForm(){
             <PasswordInputField onChange={setPassword}/>
             <DisplayedMessageContainer displayedMessage={displayedLoginMessage} />
             <LoginButton onClick={startLoggingIn}/>
+            <Button onClick={backdoor}>
+              Backdoor - login as user<br />(remove once user service implemented)
+            </Button>
+            <Button onClick={backdoorAdmin}>
+              Backdoor - login as admin<br />(remove once user service implemented)
+            </Button>
           </form>
         </>
     )
