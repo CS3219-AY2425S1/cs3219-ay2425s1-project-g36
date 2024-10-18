@@ -9,11 +9,17 @@ TODO: matching based on user's requirements.
 export type TDifficulty = "easy" | "medium" | "hard";
 export type SelectedDifficultyData = {[difficulty in TDifficulty] : boolean};
 
+enum UserReadyState {
+    Waiting, // Waiting for the user to get ready
+    Ready, // The user has comfirmed that he or she is ready
+    NotReady, // The user failed to get ready in time
+}
+
 type User = {
     userToken : string,
     difficulties : SelectedDifficultyData,
     topics : string[]
-    isReady : boolean,
+    readyState : UserReadyState,
     matchedUser : User | null
 }
 
@@ -67,4 +73,4 @@ class MatchingQueue {
     }
 }
 
-export { MatchingQueue, User };
+export { MatchingQueue, UserReadyState, User };

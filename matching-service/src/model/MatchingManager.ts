@@ -7,9 +7,7 @@ TODO: matching based on user's requirements.
 */
 
 import { assert } from "console";
-import { MatchingQueue, User } from "./MatchingQueue";
-
-
+import { MatchingQueue, User, UserReadyState } from "./MatchingQueue";
 
 class MatchingManager {
     private readonly queue : MatchingQueue;
@@ -31,14 +29,24 @@ class MatchingManager {
         assert(user2.matchedUser === null, `[matchTwoUsersTogether] user2.matchedUser should be null, but got ${user2.matchedUser}`);
         user1.matchedUser = user2;
         user2.matchedUser = user1;
+        user1.readyState = UserReadyState.Waiting;
+        user2.readyState = UserReadyState.Waiting;
+    }
+
+    private getMatchedUser(user : User) : User {
+        if(user.matchedUser === null){
+            throw new Error("This user is not matched with anyone yet");
+        }
+        return user.matchedUser;
     }
 
     /**
      * Dismiss two matched users when at least one user failed to get ready in time.
-     * @param user1 The first user
-     * @param user2 The second user
+     * @param userToken The token for any user between the two users that will be dismissed
      */
-    private dismissMatchedUsersAfterNotGettingReady(user1 : User, user2 : User) : void {
+    dismissMatchedUsersAfterNotGettingReady(userToken : string) : void {
+        const user1 = this.getUser(userToken);
+        const user2 = this.getMatchedUser(user1);
         assert(user1.matchedUser === user2, "[dismissMatchedUsersAfterNotGettingReady] user1.matchedUser should be user2, but got " + user1.matchedUser);
         assert(user2.matchedUser === user1, "[dismissMatchedUsersAfterNotGettingReady] user2.matchedUser should be user1, but got " + user2.matchedUser);
         user1.matchedUser = null;
@@ -121,6 +129,33 @@ class MatchingManager {
             this.queue.removeUser(this.getUser(userToken));
         }
         delete this.allUsers[userToken];
+    }
+
+    /**
+     * Set the ready state for a user
+     * @param userToken The token of the user
+     * @param readyState The ready state of the user
+     */
+    setReadyState(userToken : string, readyState : UserReadyState) : void {
+        if(!this.isUserInMatchingService(userToken)){
+            throw new Error("User does not exist in matching service");
+        }
+        const user = this.getUser(userToken);
+        user.readyState = readyState;
+    }
+
+    /**
+     * Get the ready state for the matched (peer) user of a user
+     * @param userToken The token of the user
+     * @param readyState The ready state of the peer user (the user matched with this user with the given token)
+     */
+    getPeerReadyState(userToken : string) : UserReadyState {
+        if(!this.isUserInMatchingService(userToken)){
+            throw new Error("User does not exist in matching service");
+        }
+        const user = this.getUser(userToken);
+        const matchedUser = this.getMatchedUser(user);
+        return matchedUser.readyState;
     }
 
     private getUser(userToken : string) : User {
