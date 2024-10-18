@@ -7,16 +7,19 @@ TODO: matching based on user's requirements.
 */
 
 import { assert } from "console";
-import { MatchingQueue, User } from "./MatchingQueue";
+import { Queue } from "./queue";
+import { User } from "./user";
 
 
 
-class MatchingManager {
-    private readonly queue : MatchingQueue;
+class QueueManager {
+    private readonly matchingQueue : Queue;
+    private readonly confirmationQueue : Queue;
     private readonly allUsers : {[userToken : string] : User};
 
     constructor() {
-        this.queue = new MatchingQueue();
+        this.matchingQueue = new Queue();
+        this.confirmationQueue = new Queue();
         this.allUsers = {};
     }
 
@@ -25,12 +28,18 @@ class MatchingManager {
      * @param user1 The first user
      * @param user2 The second user
      */
-    private matchTwoUsersTogether(user1 : User, user2 : User) : void {
+    matchTwoUsersTogether(user1 : User, user2 : User) : void {
         console.log(`Matching user with token = ${user1.userToken} and user with token = ${user2.userToken} together`);
         assert(user1.matchedUser === null, `[matchTwoUsersTogether] user1.matchedUser should be null, but got ${user1.matchedUser}`);
         assert(user2.matchedUser === null, `[matchTwoUsersTogether] user2.matchedUser should be null, but got ${user2.matchedUser}`);
         user1.matchedUser = user2;
         user2.matchedUser = user1;
+
+        // Move users to confirmation queue
+        this.confirmationQueue.push(user1);
+        this.confirmationQueue.push(user2);
+        this.matchingQueue.removeUser(user1);
+        this.matchingQueue.removeUser(user2);
     }
 
     /**
@@ -54,6 +63,8 @@ class MatchingManager {
         return this.getUser(userToken).matchedUser !== null;
     }
 
+
+    // NOTE: may be redundant ?
     /**
      * Try matching another user for a given user.
      * @param userToken The token of the given user for matching another user. The token must correspond to a user **currently in the matching service**.
@@ -61,17 +72,17 @@ class MatchingManager {
      * @returns `true` if successfully matched another user, `false` otherwise.
      */
     tryMatchWith(userToken : string) : boolean {
-        if(this.queue.isEmpty()) {
+        if(this.matchingQueue.isEmpty()) {
             return false;
         }
         const user = this.getUser(userToken);
         // TODO: implement "matching based on user requirements" here
-        const theOtherUser = this.queue.peek();
+        const theOtherUser = this.matchingQueue.peek(0);
         if(theOtherUser.userToken === userToken) {
             return false
         }
-        this.queue.pop();
-        this.queue.removeUser(this.getUser(userToken));
+        this.matchingQueue.pop();
+        this.matchingQueue.removeUser(this.getUser(userToken));
         this.matchTwoUsersTogether(user, theOtherUser);
         return true;
     }
@@ -91,10 +102,11 @@ class MatchingManager {
      */
     push(user : User) {
         if(this.isUserInMatchingService(user.userToken)) {
-            this.removeUser(user.userToken);
+            //this.removeUser(user.userToken);
+            return;
         }
         this.allUsers[user.userToken] = user;
-        this.queue.push(user);
+        this.matchingQueue.push(user);
     }
 
     /**
@@ -105,7 +117,7 @@ class MatchingManager {
         if(!this.isUserInMatchingService(userToken)) {
             return;
         }
-        this.queue.removeUser(this.getUser(userToken));
+        this.matchingQueue.removeUser(this.getUser(userToken));
         delete this.allUsers[userToken];
     }
 
@@ -113,12 +125,26 @@ class MatchingManager {
      * Remove a user from the matching service
      * @param userToken The token of the user
      */
-    removeUser(userToken : string) : void {
+    removeUserFromMatching(userToken : string) : void {
         if(!this.isUserInMatchingService(userToken)){
             throw new Error("User does not exist in matching service");
         }
-        if(this.queue.isUserInQueue(userToken)){
-            this.queue.removeUser(this.getUser(userToken));
+        if(this.matchingQueue.isUserInQueue(userToken)){
+            this.matchingQueue.removeUser(this.getUser(userToken));
+        }
+        delete this.allUsers[userToken];
+    }
+
+    /**
+     * Remove a user from the confirmation queue
+     * @param userToken The token of the user
+     */
+    removeUserFromConfirmation(userToken : string) : void {
+        if(!this.isUserInMatchingService(userToken)){
+            throw new Error("User does not exist in matching service");
+        }
+        if(this.confirmationQueue.isUserInQueue(userToken)){
+            this.confirmationQueue.removeUser(this.getUser(userToken));
         }
         delete this.allUsers[userToken];
     }
@@ -129,9 +155,53 @@ class MatchingManager {
         }
         return this.allUsers[userToken];
     }
+
+    /**
+     * Counts the number of users in the queue
+     * @returns The number of users in the queue
+     */
+    length() : number {
+        return this.matchingQueue.count();
+    }
+
+    /**
+     * Get the user at the given index in the queue
+     * @param index The index of the user
+     * @returns The user at the given index
+     */
+    getIndex(index : number) : User {
+        return this.matchingQueue.peek(index);
+    }
+
+    /**
+     * Sets the user as ready.
+     * @param userToken The token of the user
+     */
+    // setReady(userToken : string) : void {
+    //     const user = this.getUser(userToken);
+    //     user.isReady = true;
+    // }
+
+    /**
+     * Check if a user is ready
+     * @param userToken The token of the user
+     * @returns `true` if the user is ready, `false` otherwise
+     */
+    // isReady(userToken : string) : boolean {
+    //     return this.getUser(userToken).isReady;
+    // }
+
+    /**
+     * Return the matched user of a user
+     * @param userToken The token of the user
+     * @returns The matched user of the user
+     */
+    getMatchedUser(userToken : string) : User | null {
+        return this.getUser(userToken).matchedUser;
+    }
 }
 
-const matchingManagerInstance = new MatchingManager();
+const queueManagerInstance = new QueueManager();
 
-export default matchingManagerInstance;
+export default queueManagerInstance;
 

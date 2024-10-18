@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 /*
 TODO:
 Here I only implemented a simple matching logic based on a single queue.
@@ -6,19 +8,8 @@ For now any two users could be matched together (ignoring their requirements on 
 TODO: matching based on user's requirements.
 */
 
-export type TDifficulty = "easy" | "medium" | "hard";
-export type SelectedDifficultyData = {[difficulty in TDifficulty] : boolean};
 
-type User = {
-    userToken : string,
-    difficulties : SelectedDifficultyData,
-    topics : string[]
-    isReady : boolean,
-    matchedUser : User | null
-}
-
-
-class MatchingQueue {
+class Queue {
     private readonly queue : User[];
 
     constructor() {
@@ -36,11 +27,11 @@ class MatchingQueue {
         this.queue.push(user);
     }
 
-    peek() : User {
+    peek(index : number) : User {
         if(this.isEmpty()) {
             throw new Error("Trying to peek from an empty matching queue");
         }
-        return this.queue[0];
+        return this.queue[index];
     }
 
     pop() : User {
@@ -67,4 +58,4 @@ class MatchingQueue {
     }
 }
 
-export { MatchingQueue, User };
+export { Queue };
