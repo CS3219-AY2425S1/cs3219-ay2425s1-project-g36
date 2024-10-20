@@ -10,6 +10,11 @@ import AccountSettingsPage from "./pages/user-service/AccountSettingsPage";
 import ErrorPage from "./pages/ErrorPage";
 import AddQuestionPage from "./pages/question-service/AddQuestionPage";
 import { Toaster } from "./components/ui/toaster";
+import StartMatchingPage from "./pages/matching-service/StartMatchingPage";
+import WaitForMatchingPage from "./pages/matching-service/WaitForMatchingPage";
+import MatchingFailedPage from "./pages/matching-service/MatchingFailedPage";
+import GetReadyPage from "./pages/matching-service/GetReadyPage";
+import CollaborationPage from "./pages/collaboration-service/CollaborationPage";
 
 /**
  * A wrapper around routes that should only be accessed by logged-in users.
@@ -140,6 +145,35 @@ function App() {
               nonAdminRoute={ <Navigate to="/questions" /> }
             />
           } />
+          <Route path="/matching/start" element={
+            <PrivateRoute>
+              <StartMatchingPage />
+            </PrivateRoute>
+          } />
+          <Route path="/matching/wait" element={
+            <PrivateRoute>
+              <WaitForMatchingPage />
+            </PrivateRoute>
+          }
+          />
+          <Route path="/matching/failed" element={
+            <PrivateRoute>
+              <MatchingFailedPage />
+            </PrivateRoute>
+          }
+          />
+          <Route path="/matching/get_ready" element={
+            <PrivateRoute>
+              <GetReadyPage />
+            </PrivateRoute>
+          }
+          />
+          <Route path="/collaboration" element={
+            <PrivateRoute>
+              <CollaborationPage />
+            </PrivateRoute>
+          }
+          />
           <Route path="*" Component={ ErrorPage } />
         </Routes>
       </BrowserRouter>
