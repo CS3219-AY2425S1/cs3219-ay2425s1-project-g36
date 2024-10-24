@@ -1,0 +1,41 @@
+{
+  "name": "user-service",
+  "version": "1.0.0",
+  "main": "server.ts",
+  "scripts": {
+    "start": "ts-node server.ts",
+    "dev": "nodemon --exec ts-node server.ts --files",
+    "docker-build-image": "docker build -t user-service-image .",
+    "docker-create-container": "docker run -d -p 4000:4000 --name user-service user-service-image",
+    "docker-start": "docker start user-service",
+    "docker-stop": "docker stop user-service"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.7.0",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/nodemailer": "^6.4.16",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.6.3",
+    "nodemailer": "^6.9.15"
+  }
+}
