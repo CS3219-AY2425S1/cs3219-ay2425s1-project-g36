@@ -37,7 +37,7 @@ export default function StartMatchingForm() {
     const topicsStr = questionTopics.join(", ");
     navigate(`../matching/wait?difficulties=${difficultiesStr}&topics=${topicsStr}`);
 
-    sendStartMatchingRequest(auth.token, selectedDifficultyData, questionTopics).then(
+    sendStartMatchingRequest(auth.id, selectedDifficultyData, questionTopics).then(
       response => {
         const httpStatus = response.status;
         const errorMessage = response.message

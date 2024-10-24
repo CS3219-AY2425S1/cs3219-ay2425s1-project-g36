@@ -50,7 +50,7 @@ export default function WaitForMatchingPage() {
       console.log("matching cancelled due to leaving page");
       return;
     }
-    sendCheckMatchingStateRequest(auth.token).then(
+    sendCheckMatchingStateRequest(auth.id).then(
       response => {
         const isSuccess = response.status === 200;
         if(isSuccess) {

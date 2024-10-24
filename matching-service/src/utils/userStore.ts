@@ -2,7 +2,7 @@ import { User } from "../model/user";
 
 
 // UserStore is a singleton class that stores all the users 
-// that are currently in the matching service to map them to their userToken.
+// that are currently in the matching service to map them to their user id.
 class UserStore {
     private userStore: Map<string, User>;
 
@@ -10,20 +10,20 @@ class UserStore {
         this.userStore = new Map<string, User>();
     }
 
-    addUser(userToken: string, userObject: User) {
-        this.userStore.set(userToken, userObject);
+    addUser(userId: string, userObject: User) {
+        this.userStore.set(userId, userObject);
     }
 
-    getUser(userToken: string) {
-        return this.userStore.get(userToken);
+    getUser(userId: string) {
+        return this.userStore.get(userId);
     }
 
-    removeUser(userToken: string) {
-        this.userStore.delete(userToken);
+    removeUser(userId: string) {
+        this.userStore.delete(userId);
     }
 
-    hasUser(userToken: string) {
-        return this.userStore.has(userToken);
+    hasUser(userId: string) {
+        return this.userStore.has(userId);
     }
 }
 
