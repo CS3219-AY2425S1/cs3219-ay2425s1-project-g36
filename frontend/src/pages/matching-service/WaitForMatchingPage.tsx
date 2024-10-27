@@ -50,17 +50,18 @@ export default function WaitForMatchingPage() {
       console.log("matching cancelled due to leaving page");
       return;
     }
-    sendCheckMatchingStateRequest(auth.id).then(
+    sendCheckMatchingStateRequest(auth.token).then(
       response => {
-        if(response.status === 200) {
-          console.log("match found!");
-          cancelMatching(false);
-          navigate(`../collaboration`);
-        } else if (response.status === 202) {
-          //Do nothing
-          console.log("matching...");
+        const isSuccess = response.status === 200;
+        if(isSuccess) {
+          if(response.message === "match found") {
+            console.log("match found!");
+            cancelMatching(false);
+            navigate(`../collaboration`);
+          }
+          return;
         }
-        else if (response.message === "ERR_NETWORK") {
+        if(response.message === "ERR_NETWORK") {
           checkMatchingStateNetworkErrorCount.current++;
           if(checkMatchingStateNetworkErrorCount.current >= MAXIMUM_CHECK_MATCHING_STATE_NETWORK_ERROR_COUNT) {
             cancelMatching(false);
@@ -92,7 +93,7 @@ export default function WaitForMatchingPage() {
       window.clearInterval(endMatchingTimerIntervalID.current);
     }
     if(sendCancellationRequest) {
-      sendCancelMatchingRequest(auth.id);
+      sendCancelMatchingRequest(auth.token);
     }
     navigate("../matching/start");
   }
@@ -113,7 +114,7 @@ export default function WaitForMatchingPage() {
   const updateEndMatchingTimer = () => {
     setEndMatchingTimer(val => {
       if(val - 1 <= 0) {
-        cancelMatching(false);
+        cancelMatching();
         console.log("matching cancelled due to timed out");
         navigate(`../matching/failed?message=A match couldn't be found after ${MAXIMUM_MATCHING_DURATION} seconds. You may try again or refine your question selections to increase your chances to match.&difficulties=${difficultiesStr}&topics=${topicsStr}`);
       }

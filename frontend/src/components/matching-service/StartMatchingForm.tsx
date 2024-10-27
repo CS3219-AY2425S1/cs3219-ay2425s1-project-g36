@@ -9,8 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { DisplayedMessage, DisplayedMessageContainer, DisplayedMessageTypes } from "../common/DisplayedMessage";
 
 const HTTP_OK = 200
-const HTTP_ALREADY_EXISTS = 409
-const HTTP_ERROR = 500
+const HTTP_NO_CONTENT = 204
+const HTTP_REQUEST_TIMEOUT = 408
 
 export default function StartMatchingForm() {
 
@@ -37,14 +37,14 @@ export default function StartMatchingForm() {
     const topicsStr = questionTopics.join(", ");
     navigate(`../matching/wait?difficulties=${difficultiesStr}&topics=${topicsStr}`);
 
-    sendStartMatchingRequest(auth.id, auth.email, selectedDifficultyData, questionTopics).then(
+    sendStartMatchingRequest(auth.token, selectedDifficultyData, questionTopics).then(
       response => {
         const httpStatus = response.status;
         const errorMessage = response.message
 
         if (httpStatus === HTTP_OK) {
-          // Do nothing here
-        } else if (httpStatus === HTTP_ALREADY_EXISTS || httpStatus === HTTP_ERROR) {
+          // navigate("/matching/get_ready")
+        } else if (httpStatus === HTTP_NO_CONTENT || httpStatus === HTTP_REQUEST_TIMEOUT) {
           navigate(`/matching/failed?message=${errorMessage}&difficulties=${difficultiesStr}&topics=${topicsStr}`);
         } else {
           displayError("An error has occured: \n" + response.message);

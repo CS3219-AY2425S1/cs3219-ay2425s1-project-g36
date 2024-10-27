@@ -18,15 +18,14 @@ let previousStartMatchingData : any = null;
 /**
  * An async function for sending a start matching request to the backend.
  * 
- * @param id The current user's id.
+ * @param token The current user's token.
  * @param difficulties The difficulties selected by the user for matching.
  * @param topics The topics selected by the user for matching.
  * @returns An object containing the HTTP status code of the request and the message from the backend server
  */
-async function sendStartMatchingRequest(id : string, email : string, difficulties : SelectedDifficultyData, topics : string[]) {
+async function sendStartMatchingRequest(token : string, difficulties : SelectedDifficultyData, topics : string[]) {
   const requestBody = {
-    id : id,
-    email : email,
+    userToken : token,
     difficulties : difficulties,
     topics : topics
   }
@@ -63,12 +62,12 @@ async function retryPreviousMatching(token : string) {
  * An async function for sending a check matching state request to the backend.
  * You should call this function intermittently for multiple times when waiting for matching in order to get the latest matching state.
  * 
- * @param id The current user's id.
+ * @param token The current user's token.
  * @returns An object containing the HTTP status code of the request and the message from the backend server.
  */
-async function sendCheckMatchingStateRequest(id : string) {
+async function sendCheckMatchingStateRequest(token : string) {
   const requestBody = {
-    id : id
+    userToken : token
   }
   return await api.post(MATCHING_BASE_URL + CHECK_MATCHING_STATE_URL, requestBody).then(response => {
     return {status : response.status, message : response.data.message}
@@ -87,9 +86,9 @@ async function sendCheckMatchingStateRequest(id : string) {
  * @param token The current user's token.
  * @returns An object containing the HTTP status code of the request and the message from the backend server.
  */
-async function sendCancelMatchingRequest(id : string) {
+async function sendCancelMatchingRequest(token : string) {
   const requestBody = {
-    id : id
+    userToken : token
   }
   return await api.post(MATCHING_BASE_URL + CANCEL_MATCHING_URL, requestBody).then(response => {
     return {status : response.status, message : response.data.message}

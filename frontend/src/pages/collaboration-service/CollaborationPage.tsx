@@ -1,10 +1,14 @@
-import { Link } from "react-router-dom";
+import CodeEditingArea from "@/components/collaboration-service/CodeEditingArea";
+import MainContainer from "@/components/common/MainContainer";
+import PageHeader from "@/components/common/PageHeader";
 
-export default function collaborationPage() {
+export default function CollaborationPage() {
     return (
-    <>
-      <div>You have successfully matched someone. This is the collaboration page that is still TODO.</div>
-      <Link to="../matching/start">Back to matching</Link>
-    </>
+      <>
+        <PageHeader/>
+        <MainContainer>
+          <CodeEditingArea/>
+        </MainContainer>
+      </>
     );
 }
