@@ -1,11 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import MainContainer from "@/components/common/MainContainer";
 import PageHeader from "@/components/common/PageHeader";
-import { useAuth } from "@/contexts/AuthContext";
-import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import TextEditor from "@/components/collaboration-service/TextEditor";
 import { useParams } from "react-router-dom"
 import { CollaborationContextProvider } from "@/contexts/CollaborationContext";
 import LayoutManager from "@/components/collaboration-service/LayoutManager";
@@ -41,7 +37,7 @@ export default function CollaborationPage() {
       <MainContainer>
         <CollaborationContextProvider>
           <LayoutManager
-            codeEditingArea={<CodeEditingArea/>}
+            codeEditingArea={<CodeEditingArea documentId={documentId}/>}
             questionArea={<QuestionArea questionId={questionId || "72"}/>}
           />
         </CollaborationContextProvider>

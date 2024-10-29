@@ -5,8 +5,8 @@ import VerticallySplitedView from "../common/VerticallySplitedView";
 
 enum LayoutModes {
   VerticallySplittedView,
-  FullWindow_Question,
-  FullWindow_Code,
+  FullPage_Question,
+  FullPage_Code,
 }
 
 export default function LayoutManager({codeEditingArea, questionArea} : {codeEditingArea: ReactNode, questionArea: ReactNode}) {
@@ -20,8 +20,8 @@ export default function LayoutManager({codeEditingArea, questionArea} : {codeEdi
   }
 
   const BUTTON_VERTICALLY_SPLITTED_VIEW = <Button id="vertically_splited_view" onClick={()=>changeLayoutMode(LayoutModes.VerticallySplittedView)} className="bg-gray-100"><ViewVerticalIcon className="mr-2"/>Vertically splited view</Button>;
-  const BUTTON_FULLWINDOW_CODE =  <Button id="code_full_window" onClick={()=>changeLayoutMode(LayoutModes.FullWindow_Code)} className="bg-gray-100"><EnterFullScreenIcon className="mr-2"/>View code in full window</Button>;
-  const BUTTON_FULLWINDOW_QUESTION = <Button id="question_full_window" onClick={()=>changeLayoutMode(LayoutModes.FullWindow_Question)} className="bg-gray-100"><EnterFullScreenIcon className="mr-2"/>View question in full window</Button>;
+  const BUTTON_FULLWINDOW_CODE =  <Button id="code_full_page" onClick={()=>changeLayoutMode(LayoutModes.FullPage_Code)} className="bg-gray-100"><EnterFullScreenIcon className="mr-2"/>View code in full page</Button>;
+  const BUTTON_FULLWINDOW_QUESTION = <Button id="question_full_page" onClick={()=>changeLayoutMode(LayoutModes.FullPage_Question)} className="bg-gray-100"><EnterFullScreenIcon className="mr-2"/>View question in full page</Button>;
 
   const renderLayout__VerticallySplittedView = () => {
     return (
@@ -53,9 +53,9 @@ export default function LayoutManager({codeEditingArea, questionArea} : {codeEdi
     switch(layoutMode) {
       case LayoutModes.VerticallySplittedView:
         return renderLayout__VerticallySplittedView();
-      case LayoutModes.FullWindow_Question:
+      case LayoutModes.FullPage_Question:
         return renderLayout__FullScreen_Question();
-      case LayoutModes.FullWindow_Code:
+      case LayoutModes.FullPage_Code:
         return renderLayout__FullScreen_Code();
     }
   };
@@ -67,12 +67,12 @@ export default function LayoutManager({codeEditingArea, questionArea} : {codeEdi
             BUTTON_FULLWINDOW_QUESTION,
             BUTTON_FULLWINDOW_CODE
         ];
-      case LayoutModes.FullWindow_Question:
+      case LayoutModes.FullPage_Question:
         return [
           BUTTON_VERTICALLY_SPLITTED_VIEW,
           BUTTON_FULLWINDOW_CODE
         ];
-      case LayoutModes.FullWindow_Code:
+      case LayoutModes.FullPage_Code:
         return [
           BUTTON_VERTICALLY_SPLITTED_VIEW,
           BUTTON_FULLWINDOW_QUESTION

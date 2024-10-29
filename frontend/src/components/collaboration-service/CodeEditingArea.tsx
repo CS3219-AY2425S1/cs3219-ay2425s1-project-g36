@@ -7,6 +7,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { AceEditorThemes } from "./AceEditorThemes";
+import { io, Socket } from "socket.io-client";
+import { useCollaborationContext } from "@/contexts/CollaborationContext";
+import { DEFAULT_CODE_EDITOR_SETTINGS } from "./CodeEditorSettings";
+import { useEffect, useState } from "react";
 
 // Ace Editor Modes
 import "ace-builds/src-noconflict/mode-c_cpp";
@@ -23,10 +27,10 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/theme-github_dark";
 import "ace-builds/src-noconflict/theme-twilight";
 import "ace-builds/src-noconflict/theme-terminal";
-import { useCollaborationContext } from "@/contexts/CollaborationContext";
-import { DEFAULT_CODE_EDITOR_SETTINGS } from "./CodeEditorSettings";
 
-export default function CodeEditingArea() {
+const SAVE_INTERVAL_MS = 2000;
+
+export default function CodeEditingArea({ documentId }: { documentId: string }) {
   const { codeEditingAreaState } = useCollaborationContext();
   const {
     displayLanguageSelectionPanel, setDisplayLanguageSelectionPanel,
@@ -80,6 +84,59 @@ export default function CodeEditingArea() {
         return newBuffer;
     });
   }
+
+
+  const [socket, setSocket] = useState<Socket>()
+
+  const editCode = (rawCode : string) => {
+    setRawCode(rawCode);
+    if(!socket) return;
+    socket.emit('send-changes', rawCode);
+  }
+    
+  // connects to socket upon component mount
+  useEffect(() => {
+    const s = io("http://localhost:3001")
+    setSocket(s)
+    return () => {
+      s.disconnect()
+    }
+  }, [])
+
+  // upon entering the collaboration page, socket retrieves the document from db (if exists)
+  // or creates a new one. Quill loads the document data to the frontend
+  useEffect(() => {
+    if (socket == null) return
+      socket.once('load-document', document => {
+        setRawCode(document);
+    })
+    socket.emit('get-document', documentId)
+  }, [socket, documentId])
+
+    // saves changes to db every 2 seconds
+  useEffect(() => {
+    if (socket == null) return
+    const interval = setInterval(() => {
+      socket.emit('save-document', rawCode)
+    }, SAVE_INTERVAL_MS)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [socket])
+
+  // whenever socket receives changes, update Quill
+  useEffect(() => {
+    if (socket == null) return
+    const handler = (delta: any) => {
+      setRawCode(delta);
+    }
+
+    socket.on('receive-changes', handler)
+    return () => {
+      socket.off('receive-changes', handler)
+    }
+
+  }, [socket])
 
   return (
     <>
@@ -140,7 +197,7 @@ export default function CodeEditingArea() {
         </div>
         <div className="mt-3 md-3"/>
         <AceEditor
-          onChange={code=>setRawCode(code)}
+          onChange={code=>editCode(code)}
           value={rawCode}
           mode={currentlySelectedLanguage.aceEditorModeName}
           onFocus={()=>{setDisplayLanguageSelectionPanel(false);setDisplayEditorSettingsPanel(false)}}
