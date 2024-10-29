@@ -104,11 +104,11 @@ export default function CodeEditingArea({ documentId }: { documentId: string }) 
   }, [])
 
   // upon entering the collaboration page, socket retrieves the document from db (if exists)
-  // or creates a new one. Quill loads the document data to the frontend
+  // or creates a new one. Then, load the raw code to the code editor.
   useEffect(() => {
     if (socket == null) return
-      socket.once('load-document', document => {
-        setRawCode(document);
+      socket.once('load-document', rawCode => {
+        setRawCode(rawCode);
     })
     socket.emit('get-document', documentId)
   }, [socket, documentId])
@@ -124,11 +124,11 @@ export default function CodeEditingArea({ documentId }: { documentId: string }) 
     }
   }, [socket])
 
-  // whenever socket receives changes, update Quill
+  // whenever socket receives changes, update the code in the editor.
   useEffect(() => {
     if (socket == null) return
-    const handler = (delta: any) => {
-      setRawCode(delta);
+    const handler = (rawCode: any) => {
+      setRawCode(rawCode);
     }
 
     socket.on('receive-changes', handler)
