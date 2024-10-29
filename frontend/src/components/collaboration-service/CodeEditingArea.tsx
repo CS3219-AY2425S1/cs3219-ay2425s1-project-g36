@@ -202,6 +202,7 @@ export default function CodeEditingArea({ documentId }: { documentId: string }) 
           mode={currentlySelectedLanguage.aceEditorModeName}
           onFocus={()=>{setDisplayLanguageSelectionPanel(false);setDisplayEditorSettingsPanel(false)}}
           width="100%"
+          height="1000px"
           fontSize={editorSettings.fontSize}
           wrapEnabled={editorSettings.warp}
           theme={editorSettings.theme.internalName}
