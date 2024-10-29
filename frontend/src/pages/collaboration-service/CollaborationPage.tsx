@@ -7,12 +7,14 @@ import { CollaborationContextProvider } from "@/contexts/CollaborationContext";
 import LayoutManager from "@/components/collaboration-service/LayoutManager";
 import CodeEditingArea from "@/components/collaboration-service/CodeEditingArea";
 import QuestionArea from "@/components/collaboration-service/QuestionArea";
+import PageTitle from "@/components/common/PageTitle";
 
 export default function CollaborationPage() {
   const { documentId } = useParams()
   const [ parameters ] = useSearchParams()
   console.log(`documentId is: ${documentId}`)
   const questionId = parameters.get("questionId");
+  const collaboratorName = parameters.get("collaboratorName");
 
   if (documentId == null) {
     return (
@@ -36,6 +38,7 @@ export default function CollaborationPage() {
       <PageHeader />
       <MainContainer>
         <CollaborationContextProvider>
+          <PageTitle>You are now collaborating with {collaboratorName}.</PageTitle>
           <LayoutManager
             codeEditingArea={<CodeEditingArea documentId={documentId}/>}
             questionArea={<QuestionArea questionId={questionId || "72"}/>}
