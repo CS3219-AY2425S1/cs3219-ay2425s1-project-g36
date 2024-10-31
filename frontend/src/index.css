@@ -16,3 +16,7 @@ a:not(button a):not(nav a):not(div[role="menuitem"] a):not(#peerprep-header) {
 .btngreen {
   @apply bg-green-500 hover:bg-green-500/85 text-white hover:text-gray-100 !important;
 }
+
+.ql-editor {
+  font-family: Consolas, 'Courier New', Courier, monospace;
+}
