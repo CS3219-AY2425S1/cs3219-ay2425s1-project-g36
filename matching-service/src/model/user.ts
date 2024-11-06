@@ -6,6 +6,7 @@ interface User {
     email : string;
     difficulties : SelectedDifficultyData;
     topics : string[];
+    progLangs : string[];
     timeout : NodeJS.Timeout | null;
     isPeerReady : boolean;
     matchedUser : User | null;

@@ -1,18 +1,26 @@
 import { ComponentType } from "react";
 import { CrossCircledIcon, ExclamationTriangleIcon, InfoCircledIcon } from "@radix-ui/react-icons"
 
-
+/**
+ * Represents the type of message displayed through the `DisplayedMessageContainer`.
+ */
 enum DisplayedMessageTypes {
     Info,
     Warning,
     Error
 }
 
+/**
+ * Represents a message displayed through the `DisplayedMessageContainer`.
+ */
 type DisplayedMessage = {
     message : string | React.ReactNode,
     type : DisplayedMessageTypes
 }
 
+/**
+ * Displays a message with a specified message, colour and icon.
+ */
 function DisplayedMessageComponent({message, color, icon : Icon}:{message : React.ReactNode, color : string, icon : ComponentType}) {
     return (
       <>
@@ -28,6 +36,9 @@ function DisplayedMessageComponent({message, color, icon : Icon}:{message : Reac
 
 }
 
+/**
+ * Displays a `DisplayedMessage`.
+ */
 function DisplayedMessageContainer({displayedMessage} : {displayedMessage : DisplayedMessage | null}) {
     return (
         <>

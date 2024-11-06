@@ -8,6 +8,9 @@ const LOGOUT_API = "/logout";
 const SIGNUP_API = "/";
 const FORGOT_PASSWORD_API = "/forgot-password";
 const RESET_PASSWORD_API = "/reset-password";
+const UPDATE_ACCOUNT_API = "/update";
+const DELETE_ACCOUNT_API = "/";
+const UPDATE_PRIVILEGE_API = "/privilege";
 
 const api = axios.create({
   baseURL: USER_SERVICE_URL,
@@ -99,6 +102,7 @@ async function sendLogoutRequest() {
 
 async function getUserById(id: string) {
   try {
+    console.log(USERS_BASE_URL + `/${id}`);
     const response = await api.get(USERS_BASE_URL + `/${id}`)
     return {status: response.status, message: response.data.message, data: response.data.data};
   } catch (error : any) {
@@ -113,10 +117,10 @@ async function getUserById(id: string) {
 async function getUsers() {
   try {
     const response = await api.get(USERS_BASE_URL);
-    return {status: response.status, message: response.data.message};
+    return {status: response.status, message: response.data.message, data: response.data.data};
   } catch (error: any) {
     console.error("Error when retrieving user list", error);
-    return {status: error.response.status, message: error.response.data.message};
+    return {status: error.response.status, message: error.response.data.message, data: error.response.data.data};
   }
 }
 
@@ -149,4 +153,51 @@ async function resetPassword(token : string, password: string) {
   }
 }
 
-export { sendLoginRequest, sendForgotPasswordRequest, sendSignupRequest, sendLogoutRequest, getUsers, getUserById, getUserFromToken, resetPassword };
+/**
+ * An async function that updates the currently logged in user's username and email.
+ */
+async function updateAccount(username : string, email : string) {
+  const updateAccountData = {
+    username : username,
+    email : email,
+  };
+  try {
+    const response = await api.patch(USERS_BASE_URL + UPDATE_ACCOUNT_API, updateAccountData);
+    console.log("Successfully updated account with the following details:\nUsername:", username, "\nEmail:", email);
+    return {status: response.status, message: response.data.message};
+  } catch (error: any) {
+    console.error("Error when updating account", error);
+    return {status: error.response.status, message: error.response.data.message};
+  }
+}
+
+/**
+ * An async function that deletes a user given the user ID.
+ */
+async function deleteAccount(id : string) {
+  try {
+    const response = await api.delete(USERS_BASE_URL + DELETE_ACCOUNT_API + '/' + id);
+    return {status: response.status, message: response.data.message};
+  } catch (error: any) {
+    console.error(`Error when deleting account ID ${id}\n`, error);
+    return {status: error.response.status, message: error.response.data.message};
+  }
+}
+
+/**
+ * An async function to update a specific user's privilege given the user ID.
+ */
+async function updateUserPrivilege(id : string, isAdmin : boolean) {
+  try {
+    const response = await api.patch(USERS_BASE_URL + '/' + id + UPDATE_PRIVILEGE_API, {
+      isAdmin: isAdmin
+    });
+    return {status: response.status, message: response.data.message};
+  } catch (error: any) {
+    console.error(`Error when updating privilege of account ID ${id}\n`, error);
+    return {status: error.response.status, message: error.response.data.message};
+  }
+}
+
+
+export { sendLoginRequest, sendForgotPasswordRequest, sendSignupRequest, sendLogoutRequest, getUsers, getUserById, getUserFromToken, resetPassword, updateAccount, deleteAccount, updateUserPrivilege };

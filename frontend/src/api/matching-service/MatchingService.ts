@@ -24,12 +24,13 @@ let previousStartMatchingData : any = null;
  * @param topics The topics selected by the user for matching.
  * @returns An object containing the HTTP status code of the request and the message from the backend server
  */
-async function sendStartMatchingRequest(id : string, email : string, difficulties : SelectedDifficultyData, topics : string[]) {
+async function sendStartMatchingRequest(id : string, email : string, difficulties : SelectedDifficultyData, topics : string[], progLangs : string[]) {
   const requestBody = {
     id : id,
     email : email,
     difficulties : difficulties,
-    topics : topics
+    topics : topics,
+    progLangs : progLangs
   }
 
   previousStartMatchingData = requestBody;

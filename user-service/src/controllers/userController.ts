@@ -13,28 +13,28 @@ export async function createUser(req: Request, res: Response) {
     // sanity check
     // Valid: user@example.com, invalid: user@ example.com
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(email)) {
-			return res.status(400).json({ message: "Invalid email format" });
-		}
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
 
     const existingUser = await User.findOne({ username });
-		if (existingUser) {
-			return res.status(400).json({ message: "Username is already taken" });
-		}
+    if (existingUser) {
+      return res.status(400).json({ message: "Username is already taken" });
+    }
 
-		const existingEmail = await User.findOne({ email });
-		if (existingEmail) {
-			return res.status(400).json({ message: "Email is already taken" });
-		}
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email is already taken" });
+    }
 
     const isPasswordValid = () => {
       const re = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])[a-zA-Z0-9- ?!@#$%^&*\/\\]{8,}$/;
       return re.test(password);
     }
 
-		if (!isPasswordValid()) {
-			return res.status(400).json({ message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter and one digit. Special characters must be these: - ?!@#$%^&*\/\\" });
-		}
+    if (!isPasswordValid()) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter and one digit. Special characters must be these: - ?!@#$%^&*\/\\" });
+    }
 
     // create new user
     const salt = bcrypt.genSaltSync(10);
@@ -89,50 +89,67 @@ export async function getAllUsers(req: Request, res: Response) {
     return res.status(200).json({ message: `Found users`, data: users.map(user => user) });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Unknown error when getting all users!" });
+    return res.status(500).json({ message: "Unknown error when getting all users!", data: [] });
   }
 }
 
 export const updateUser = async (req: Request, res: Response) => {
-	const { username, email, currentPassword, newPassword } = req.body;
-	const userId = req.user._id;
+  const { username, email, currentPassword, newPassword } = req.body;
+  const userId = req.user._id;
 
-	try {
-		let user = await User.findById(userId);
-		if (!user) {
+  try {
+    let user = await User.findById(userId);
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     } 
 
-		if ((!newPassword && currentPassword) || (!currentPassword && newPassword)) {
-			return res.status(400).json({ message: "Please provide both current password and new password" });
-		}
+    if ((!newPassword && currentPassword) || (!currentPassword && newPassword)) {
+      return res.status(400).json({ message: "Please provide both current password and new password" });
+    }
 
-		if (currentPassword && newPassword) {
-			const isMatch = await bcrypt.compare(currentPassword, user.password);
-			if (!isMatch) {
+    // sanity check
+    // Valid: user@example.com, invalid: user@ example.com
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    const existingUser = await User.findOne({ username });
+    if (existingUser && existingUser.username !== user.username) {
+      return res.status(400).json({ message: "Username is already taken" });
+    }
+
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail && existingEmail.email !== user.email) {
+      return res.status(400).json({ message: "Email is already taken" });
+    }
+
+    if (currentPassword && newPassword) {
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
         return res.status(400).json({ message: "Current password is incorrect" });
       }
-			if (newPassword.length < 10) {
-				return res.status(400).json({ message: "Password must be at least 10 characters long" });
-			}
+      if (newPassword.length < 10) {
+        return res.status(400).json({ message: "Password must be at least 10 characters long" });
+      }
 
-			const salt = await bcrypt.genSalt(10);
-			user.password = await bcrypt.hash(newPassword, salt);
-		}
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
 
-		user.email = email || user.email;
-		user.username = username || user.username;
+    user.email = email || user.email;
+    user.username = username || user.username;
 
-		user = await user.save();
+    user = await user.save();
 
-		// password should be null in response
-		user.password = "";
+    // password should be null in response
+    user.password = "";
 
-		return res.status(200).json(user);
-	} catch (error) {
-		console.log(error);
-		res.status(500).json({ error });
-	}
+    return res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error });
+  }
 };
 
 export async function deleteUser(req: Request, res: Response) {

@@ -27,6 +27,7 @@ export default function GetReadyPage() {
   const [parameters] = useSearchParams();
   const difficultiesStr = parameters.get("difficulties");
   const topicsStr = parameters.get("topics");
+  const progLangsStr = parameters.get("progLangs");
 
   const HTTP_OK = 200;
   const HTTP_WAITING = 202;
@@ -56,7 +57,7 @@ export default function GetReadyPage() {
 
     // Nothing is required to be sent to backend since it has its own timeout function
     onNavigatingAway();
-    navigate(`../matching/failed?message=${MESSAGE_NOT_GETTING_READY_IN_TIME}&difficulties=${difficultiesStr}&topics=${topicsStr}`)
+    navigate(`../matching/failed?message=${MESSAGE_NOT_GETTING_READY_IN_TIME}&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
   }
 
   /**
@@ -76,7 +77,7 @@ export default function GetReadyPage() {
         // Do nothing
         console.log("confirmation sent");
       } else if (httpStatus === HTTP_USER_NOT_FOUND || httpStatus === HTTP_ERROR) {
-        navigate(`/matching/failed?message=${errorMessage}&difficulties=${difficultiesStr}&topics=${topicsStr}`);
+        navigate(`/matching/failed?message=${errorMessage}&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
       } else {
         displayError("An error has occured: \n" + response.message);
       }
@@ -128,13 +129,13 @@ export default function GetReadyPage() {
             // TODO: backend required to handle this ?
             onNavigatingAway();
             console.log("confirmation cancelled due to network error");
-            navigate(`../matching/failed?message=Network error, please check your network and try again.&difficulties=${difficultiesStr}&topics=${topicsStr}`);
+            navigate(`../matching/failed?message=Network error, please check your network and try again.&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
           }
         } else {
           // Backend error, navigate to the failed matching page.
           onNavigatingAway();
           console.log("confirmation cancelled due to backend error");
-          navigate(`../matching/failed?message=${response.message}&difficulties=${difficultiesStr}&topics=${topicsStr}`);
+          navigate(`../matching/failed?message=${response.message}&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
         }
       }
     );

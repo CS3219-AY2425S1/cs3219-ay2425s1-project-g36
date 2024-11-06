@@ -43,6 +43,7 @@ router.post("/start_matching", async (req : Request, res : Response) => {
         email: data.email,
         difficulties: data.difficulties,
         topics: data.topics,
+        progLangs: data.progLangs,
         isPeerReady: false,
         matchedUser: null,
         timeout: null,

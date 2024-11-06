@@ -1,5 +1,5 @@
 import { sendCancelMatchingRequest } from '@/api/matching-service/MatchingService';
-import { getUsers, sendLogoutRequest } from '@/api/user-service/UserService';
+import { getUserById, sendLogoutRequest } from '@/api/user-service/UserService';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 // authentication state
@@ -25,6 +25,7 @@ const DEFAULT_AUTH_STATE = {
 interface AuthContextType {
   auth: AuthState; // current authentication state (logged in? admin?)
   login: (token : string, id: string, username: string, email: string, isAdmin?: boolean) => void; // function for login
+  update: (username: string, email: string) => void; // function for updating auth status
   logout: () => void; // function for logout
 }
 
@@ -56,19 +57,25 @@ export const AuthProvider = ({ children } : { children: React.ReactNode }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await getUsers();
-      if (response.status === 401) {
+      const response = await getUserById(auth.id);
+      if (response.status !== 200) {
         _logout();
+      } else {
+        const newAuthState = { 
+          isLoggedIn: true,
+          isAdmin: response.data.isAdmin,
+          id: auth.id,
+          token: response.data.token,
+          username: response.data.username,
+          email: response.data.email
+        };
+        setAuth(newAuthState);
+        saveAuthState(newAuthState);
       }
     } catch (err : any) {
       _logout();
     }
   }
-
-  // check authentication when app loads
-  useEffect(() => {
-    checkAuth();
-  }, []);
 
   const login = (token : string, id : string, username: string, email: string, isAdmin: boolean = false) => {
     const newAuthState = { isLoggedIn: true, isAdmin, id: id, token: token, username: username, email: email };
@@ -84,13 +91,46 @@ export const AuthProvider = ({ children } : { children: React.ReactNode }) => {
     _logout();
   };
 
-  // Effect to sync auth state changes to localStorage
+  /**
+   * Updates the current auth context with the new username and email.
+   * @param username The username to update the current auth context.
+   * @param email The email to update the current auth context.
+   */
+  const update = async (username : string, email : string) => {
+    const newAuthState = { ...auth, username: username, email: email };
+
+    setAuth(newAuthState);
+    saveAuthState(newAuthState);
+  }
+
+  // Effect to check and sync auth state changes to localStorage
   useEffect(() => {
+    // Set up a timer to run checkAuth after a 1000ms delay
+    const handler = setTimeout(() => {
+      checkAuth();
+    }, 1000);
+
     saveAuthState(auth);
+
+    // Clear the timeout if auth changes again before the delay ends
+    return () => clearTimeout(handler);
   }, [auth]);
 
+  // update auth state across browser tabs
+  useEffect(() => {
+    const handleStorageChange = (event : StorageEvent) => {
+      const newAuthState = JSON.parse(event.newValue ?? "");
+
+      setAuth(newAuthState);
+      saveAuthState(newAuthState);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ auth, login, logout }}>
+    <AuthContext.Provider value={{ auth, login, logout, update }}>
       { children }
     </AuthContext.Provider> 
   )

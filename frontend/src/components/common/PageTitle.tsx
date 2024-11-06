@@ -1,7 +1,7 @@
 import React from "react";
 
 /**
- * Creates a page title.
+ * Creates a page title using a `h2` element.
  * 
  * Example usage:
  * ```

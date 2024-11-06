@@ -17,14 +17,14 @@ export default function MatchingFailedPage() {
   const message = parameters.get("message");
   const difficultiesStr = parameters.get("difficulties");
   const topicsStr = parameters.get("topics");
-
+  const progLangsStr = parameters.get("progLangs");
 
   const retryButtonOnClick = () => {
     retryPreviousMatching(auth.token).then(
       response => {
         const isSuccess = response.status === 200;
         if(isSuccess) {
-          navigate(`../matching/wait?difficulties=${difficultiesStr}&topics=${topicsStr}`);
+          navigate(`../matching/wait?difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
         }
         else {
           displayError("An error has occured: \n" + response.message);

@@ -25,6 +25,7 @@ export default function WaitForMatchingPage() {
 
   const difficultiesStr = parameters.get("difficulties");
   const topicsStr = parameters.get("topics");
+  const progLangsStr = parameters.get("progLangs");
 
   /**
    * Check the matching state for the user every 0.5 seconds.
@@ -49,7 +50,7 @@ export default function WaitForMatchingPage() {
           // If the user is matched, navigate to the confirmation page
           console.log("match found!");
           cancelMatching(false);
-          navigate(`../matching/get_ready?difficulties=${difficultiesStr}&topics=${topicsStr}`);
+          navigate(`../matching/get_ready?difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
 
         } else if (response.status === 202) {
           // If the user is still waiting for a match, do nothing
@@ -61,14 +62,14 @@ export default function WaitForMatchingPage() {
           if(checkMatchingStateNetworkErrorCount.current >= MAXIMUM_CHECK_MATCHING_STATE_NETWORK_ERROR_COUNT) {
             cancelMatching(false);
             console.log("matching cancelled due to network error");
-            navigate(`../matching/failed?message=Network error, please check your network and try again.&difficulties=${difficultiesStr}&topics=${topicsStr}`);
+            navigate(`../matching/failed?message=Network error, please check your network and try again.&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
           }
         
         } else {
           // If there is a backend error, navigate to the failed matching page
           cancelMatching();
           console.log("matching cancelled due to backend error");
-          navigate(`../matching/failed?message=${response.message}&difficulties=${difficultiesStr}&topics=${topicsStr}`);
+          navigate(`../matching/failed?message=${response.message}&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
         }
       }
     );
@@ -116,7 +117,7 @@ export default function WaitForMatchingPage() {
       if(val - 1 <= 0) {
         cancelMatching(false);
         console.log("matching cancelled due to timed out");
-        navigate(`../matching/failed?message=A match couldn't be found after ${MAXIMUM_MATCHING_DURATION} seconds. You may try again or refine your question selections to increase your chances to match.&difficulties=${difficultiesStr}&topics=${topicsStr}`);
+        navigate(`../matching/failed?message=A match couldn't be found after ${MAXIMUM_MATCHING_DURATION} seconds. You may try again or refine your question selections to increase your chances to match.&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
       }
       return val - 1;
     });
@@ -138,7 +139,7 @@ export default function WaitForMatchingPage() {
       <MainContainer>
         <div className="flex flex-col space-y-5 justify-center items-center">
           <PageTitle>Please wait for a moment...</PageTitle>
-          <div>Searching for other users who also want to do <b>{difficultiesStr}</b> questions with topics <b>{topicsStr}</b>.</div>
+          <div>Searching for other users who also want to do <b>{difficultiesStr}</b> questions with topics <b>{topicsStr}</b> using languages <b>{progLangsStr}</b>.</div>
           <div>
             <div className="h-10" />
             <SpinningCircle>

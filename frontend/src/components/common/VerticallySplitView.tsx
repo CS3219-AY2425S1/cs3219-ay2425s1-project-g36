@@ -2,13 +2,13 @@ import { ReactNode, useState } from "react";
 import { Button } from "../ui/button";
 import {ArrowLeftIcon, ArrowRightIcon} from "@radix-ui/react-icons";
 
-export default function VerticallySplitedView({left, right, enableDragToResize = true, enableSwitchLeftAndRight = true, minimumLeftWidthPercentage = 10, maximumLeftWidthPercentage = 90} : {left : ReactNode, right : ReactNode, enableDragToResize? : boolean, enableSwitchLeftAndRight? : boolean, minimumLeftWidthPercentage? : number, maximumLeftWidthPercentage? : number}) {
+export default function VerticallySplitView({left, right, enableDragToResize = true, enableSwitchLeftAndRight = true, minimumLeftWidthPercentage = 10, maximumLeftWidthPercentage = 90} : {left : ReactNode, right : ReactNode, enableDragToResize? : boolean, enableSwitchLeftAndRight? : boolean, minimumLeftWidthPercentage? : number, maximumLeftWidthPercentage? : number}) {
   
   const [leftElement, setLeftElement] = useState<ReactNode>(left);
   const [rightElement, setRightElement] = useState<ReactNode>(right);
   const [leftWidthPercentage, setLeftWidthPercentage] = useState(50);
   
-  const CONTAINER_DIV_ID = "horizontally_splited_view_container";
+  const CONTAINER_DIV_ID = "vertically_split_view_container";
 
   const dragBarOnDragStart = (e : any) => {
     e.preventDefault();

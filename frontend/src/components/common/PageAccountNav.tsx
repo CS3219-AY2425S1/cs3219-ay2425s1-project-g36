@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { User } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
+import { Badge } from "../ui/badge"
 
 /**
  * Component for the navigation at the top right hand corner of the screen
@@ -36,9 +37,11 @@ export default function PageAccountNav() {
         <DropdownMenuContent className="w-56 bg-white" align="end">
           <DropdownMenuLabel>
             <div>
-              <p>{ auth.username }</p>
+              <div className="flex gap-2">
+                <span>{ auth.username }</span>
+                { auth.isAdmin ? <Badge>Admin</Badge> : <></> }
+              </div>
               <p className="font-normal">{ auth.email }</p>
-              <p className="font-normal">{ auth.id }</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-gray-200" />

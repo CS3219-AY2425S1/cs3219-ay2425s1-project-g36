@@ -12,7 +12,17 @@ a:not(button a):not(nav a):not(div[role="menuitem"] a):not(#peerprep-header) {
   @apply bg-black hover:bg-gray-800 text-white hover:text-gray-100 !important;
 }
 
+/* custom styling for grey background, white foreground buttons in UI */
+.btngray {
+  @apply bg-gray-800 hover:bg-gray-600 text-white hover:text-gray-100 !important;
+}
+
 /* custom styling for green background, white foreground buttons in UI */
 .btngreen {
   @apply bg-green-500 hover:bg-green-500/85 text-white hover:text-gray-100 !important;
+}
+
+/* custom styling for red background, white foreground buttons in UI */
+.btnred {
+  @apply bg-red-500 hover:bg-red-500/85 text-white hover:text-gray-100 !important;
 }

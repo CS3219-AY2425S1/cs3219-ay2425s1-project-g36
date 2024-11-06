@@ -18,7 +18,7 @@ export default function QuestionSelectField({ value, setValue } : {
         aria-labelledby="difficulty-label"
       >
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select a fruit" />
+          <SelectValue placeholder="Select a difficulty" />
         </SelectTrigger>
         <SelectContent className="bg-white">
           <SelectGroup>

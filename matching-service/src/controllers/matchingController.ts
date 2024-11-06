@@ -57,6 +57,10 @@ const findMatchingUser = (newUser: User, waitingQueue: Queue): User | null => {
             continue; 
         }
 
+        if (!newUser.progLangs.some(progLang => user.progLangs.includes(progLang))) {
+            continue;
+        }
+
         if (newUser.topics.some(topic => user.topics.includes(topic))) {
             return user; 
         }

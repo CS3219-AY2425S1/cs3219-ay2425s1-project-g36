@@ -7,7 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { AceEditorThemes } from "./AceEditorThemes";
-import { io } from "socket.io-client";
 import { useCollaborationContext } from "@/contexts/CollaborationContext";
 import { DEFAULT_CODE_EDITOR_SETTINGS } from "./CodeEditorSettings";
 import { useEffect } from "react";
@@ -41,12 +40,12 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
     editorSettingValueBuffer, setEditorSettingValueBuffer
   } = codeEditingAreaState;
 
-  const {socket, setSocket} = socketState;
+  const { socket } = socketState;
 
   const languageSelectionPanel = () => {
     return (
         <>
-        <div className="flex shadow-md p-3 absolute top-0 left-full rounded-lg bg-white bg-opacity-80 z-10 ml-2 max-h-56 overflow-y-auto">
+        <div className="flex shadow-md p-3 absolute top-full left-0 rounded-lg bg-white bg-opacity-80 z-10 mt-2 max-h-56 overflow-y-auto">
           <div>
             {
               function () {
@@ -92,24 +91,24 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
     if(!socket) return;
     socket.emit('send-changes', rawCode);
   }
-    
-  // connects to socket upon component mount
-  useEffect(() => {
-    const s = io("http://localhost:3001")
-    setSocket(s)
-    return () => {
-      s.disconnect()
-    }
-  }, [])
 
   // upon entering the collaboration page, socket retrieves the document from db (if exists)
   // or creates a new one. Then, load the raw code to the code editor.
   useEffect(() => {
-    if (socket === null) return
-    socket.once('load-document', rawCode => {
-      setRawCode(rawCode);
-    })
-    socket.emit('get-document', roomId)
+    if (rawCode !== "") return; // To make sure that the code in the editor doesn't lost when the user switches view in the collaboration frontend
+    const retryTimeout = 200; // Because the websocket requires time to connect, so here the frontend will retry again and again based on the timeout when the websocket is not connect, to make sure that the frontend will wait for the websocket to connect before getting code from backend.
+    const getCodeFromBackend = () => {
+      if (socket === null || !socket.connected) {
+        window.setTimeout(getCodeFromBackend, retryTimeout);
+        return;
+      }
+      socket.on('load-document', rawCode => {
+        console.log("code: " + (rawCode===undefined ? "undefined" : rawCode));
+        setRawCode(rawCode);
+      })
+      socket.emit('get-document', roomId)
+    }
+    window.setTimeout(getCodeFromBackend, retryTimeout);
   }, [socket, roomId])
 
     // saves changes to db every 2 seconds
@@ -126,7 +125,7 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
   // whenever socket receives changes, update the code in the editor.
   useEffect(() => {
     if (socket === null) return
-    const handler = (rawCode: any) => {
+    const handler = (rawCode: string) => {
       setRawCode(rawCode);
     }
 
@@ -146,9 +145,9 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
               className="btngreen"
               onClick={()=>setDisplayLanguageSelectionPanel(!displayLanguageSelectionPanel)}
             >
-              Select Language &gt;
+              Language: {currentlySelectedLanguage.name}
             </Button>
-            {displayLanguageSelectionPanel ? languageSelectionPanel() : <p className="ml-5">{currentlySelectedLanguage.name}</p>}
+            {displayLanguageSelectionPanel && languageSelectionPanel()}
           </div>
           <div className="relative flex flex-row items-center">
             <Button
@@ -188,7 +187,7 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
                   </DropdownMenu>
                 </div>
                 <div className="flex flex-row items-center mt-1 mb-1">
-                  <p>Warp:&nbsp;</p><Checkbox onCheckedChange={checked=>{setEditorSettings({...editorSettings, warp: checked as boolean});}} checked={editorSettings.warp}/>
+                  <p>Wrap:&nbsp;</p><Checkbox onCheckedChange={checked=>{setEditorSettings({...editorSettings, wrap: checked as boolean});}} checked={editorSettings.wrap}/>
                 </div>
               </div>
             )}
@@ -201,9 +200,9 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
           mode={currentlySelectedLanguage.aceEditorModeName}
           onFocus={()=>{setDisplayLanguageSelectionPanel(false);setDisplayEditorSettingsPanel(false)}}
           width="100%"
-          height="1000px"
+          height="800px"
           fontSize={editorSettings.fontSize}
-          wrapEnabled={editorSettings.warp}
+          wrapEnabled={editorSettings.wrap}
           theme={editorSettings.theme.internalName}
         />
       </div>
