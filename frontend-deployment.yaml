@@ -45,7 +45,7 @@ spec:
             - mountPath: /usr/src/frontend/config
               # name: frontend-claim1
               name: frontend-cm0
-            - mountPath: /usr/src/frontend
+            - mountPath: /usr/src/frontend/config
               name: frontend-claim1
             # - mountPath: /usr/src/frontend
             #   name: frontend-claim1  # Use PVC for source code
