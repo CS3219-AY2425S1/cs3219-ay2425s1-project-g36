@@ -37,20 +37,21 @@ spec:
               value: 127.0.0.1
           image: jayee230/cs3219-frontend:v1.0
           name: frontend-container
-          # imagePullPolicy: Never
+          resources:
+            requests:
+              cpu: "500m"       # Request for CPU (e.g., 500 millicores)
+              memory: "256Mi"   # Request for memory (e.g., 256Mi)
+            limits:
+              cpu: "1000m"      # Limit for CPU (e.g., 1000 millicores)
+              memory: "512Mi"   # Limit for memory (e.g., 512Mi)
           ports:
             - containerPort: 5173
               protocol: TCP
           volumeMounts:
             - mountPath: /usr/src/frontend/config
-              # name: frontend-claim1
               name: frontend-cm0
             - mountPath: /usr/src/frontend/config
               name: frontend-claim1
-            # - mountPath: /usr/src/frontend
-            #   name: frontend-claim1  # Use PVC for source code
-            # - mountPath: /usr/src/frontend/config
-            #   name: frontend-cm0  # Use ConfigMap for configuration
       restartPolicy: Always
       volumes:
         - configMap:

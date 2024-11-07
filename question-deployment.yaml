@@ -25,7 +25,13 @@ spec:
       containers:
         - image: jayee230/cs3219-question:v1.0
           name: question-service-container
-          # imagePullPolicy: Never
+          resources:
+            requests:
+              cpu: "500m"       # Request for CPU (e.g., 500 millicores)
+              memory: "512Mi"   # Request for memory 
+            limits:
+              cpu: "1000m"      # Limit for CPU (e.g., 1000 millicores)
+              memory: "1Gi"   # Limit for memory
           ports:
             - containerPort: 3000
               protocol: TCP

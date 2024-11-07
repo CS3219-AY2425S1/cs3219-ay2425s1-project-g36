@@ -25,6 +25,21 @@ spec:
       containers:
         - image: jayee230/cs3219-collab:v1.0
           name: collaboration-service-container
+          resources:
+            requests:
+              cpu: "500m"       # Request for CPU (e.g., 500 millicores)
+              memory: "512Mi"   # Request for memory 
+            limits:
+              cpu: "1000m"      # Limit for CPU (e.g., 1000 millicores)
+              memory: "1Gi"   # Limit for memory
+          # for testing purposes:
+          # resources:
+          #   requests:
+          #     cpu: "100m"        # Minimum CPU request
+          #     memory: "128Mi"    # Minimum memory request
+          #   limits:
+          #     cpu: "500m"       # Maximum CPU limit
+          #     memory: "512Mi"   # Maximum memory limit
           ports:
             - containerPort: 3001
               protocol: TCP

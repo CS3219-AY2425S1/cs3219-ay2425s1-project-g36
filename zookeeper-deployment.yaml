@@ -27,6 +27,13 @@ spec:
             - name: ZOOKEEPER_TICK_TIME
               value: "2000"
           image: confluentinc/cp-zookeeper 
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
           livenessProbe:
             exec:
               command:

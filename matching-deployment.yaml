@@ -25,6 +25,13 @@ spec:
       containers:
         - image: jayee230/cs3219-matching:v1.0
           name: matching-service-container
+          resources:
+            requests:
+              cpu: "500m"       # Request for CPU (e.g., 500 millicores)
+              memory: "512Mi"   # Request for memory 
+            limits:
+              cpu: "1000m"      # Limit for CPU (e.g., 1000 millicores)
+              memory: "1Gi"   # Limit for memory
           ports:
             - containerPort: 5000
               protocol: TCP

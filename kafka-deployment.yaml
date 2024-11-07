@@ -34,6 +34,13 @@ spec:
               value: zookeeper:2181
           image: confluentinc/cp-kafka:7.5.0
           command: ["bash", "-c", "unset KAFKA_PORT; /etc/confluent/docker/run"]
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
           # livenessProbe:
           #   exec:
           #     command:
