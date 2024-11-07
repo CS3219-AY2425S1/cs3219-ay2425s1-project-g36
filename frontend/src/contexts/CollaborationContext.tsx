@@ -2,6 +2,7 @@ import { Question } from "@/api/question-service/Question";
 import { DEFAULT_CODE_EDITOR_SETTINGS, CodeEditorSettings } from "@/components/collaboration-service/CodeEditorSettings";
 import { ProgrammingLanguage, ProgrammingLanguages } from "@/components/collaboration-service/ProgrammingLanguages";
 import { PLACEHOLDER_LOADING_QUESTION } from "@/components/collaboration-service/QuestionArea";
+import { User } from "@/api/user-service/User";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { Socket, io } from "socket.io-client";
 
@@ -18,6 +19,10 @@ type CodeEditingAreaStateType = {
   setEditorSettings: React.Dispatch<React.SetStateAction<CodeEditorSettings>>,
   editorSettingValueBuffer: {[key : string] : string},
   setEditorSettingValueBuffer: React.Dispatch<React.SetStateAction<{[key : string] : string}>>
+  runCodeResult: string,
+  setRunCodeResult: React.Dispatch<React.SetStateAction<string>>
+  isCodeRunning: boolean,
+  setIsCodeRunning: React.Dispatch<React.SetStateAction<boolean>>,
 }
 
 type QuestionAreaStateType = {
@@ -30,10 +35,16 @@ type SocketStateType = {
   setSocket: React.Dispatch<React.SetStateAction<Socket | null>>,
 }
 
+type MatchedUserType = {
+  matchedUser: User | null
+  setMatchedUser: React.Dispatch<React.SetStateAction<User | null>>,
+}
+
 type CollaborationContextType = {
   codeEditingAreaState: CodeEditingAreaStateType,
   questionAreaState: QuestionAreaStateType,
-  socketState: SocketStateType
+  socketState: SocketStateType,
+  matchedUserState: MatchedUserType
 }
 
 
@@ -44,9 +55,12 @@ const CollaborationContextProvider = ({children} : {children: ReactNode}) => {
   const [displayLanguageSelectionPanel, setDisplayLanguageSelectionPanel] = useState(false);
   const [displayEditorSettingsPanel, setDisplayEditorSettingsPanel] = useState(false);
   const [currentlySelectedLanguage, setCurrentSelectedLanguage] = useState<ProgrammingLanguage>(ProgrammingLanguages[0]);
-  const [rawCode, setRawCode] = useState("");
+  const [rawCode, setRawCode] = useState<string>("");
+  const [runCodeResult, setRunCodeResult] = useState<string>("No code has been executed yet");
+  const [isCodeRunning, setIsCodeRunning] = useState(false)
   const [editorSettings, setEditorSettings] = useState<CodeEditorSettings>(DEFAULT_CODE_EDITOR_SETTINGS);
   const [editorSettingValueBuffer, setEditorSettingValueBuffer] = useState<{[key:string] : string}>({}); // The buffer for holding the settings value that user just input into the settings panel. The values in this buffer are unparsed, so it may include invalid values. Only valid values will be assigned into the actual editor settings.
+  
   const codeEditingAreaState: CodeEditingAreaStateType =
   {
     displayLanguageSelectionPanel, setDisplayLanguageSelectionPanel,
@@ -54,7 +68,9 @@ const CollaborationContextProvider = ({children} : {children: ReactNode}) => {
     currentlySelectedLanguage, setCurrentSelectedLanguage,
     rawCode, setRawCode,
     editorSettings, setEditorSettings,
-    editorSettingValueBuffer, setEditorSettingValueBuffer
+    editorSettingValueBuffer, setEditorSettingValueBuffer,
+    runCodeResult, setRunCodeResult,
+    isCodeRunning, setIsCodeRunning
   }
 
   const [question, setQuestion] = useState<Question>(PLACEHOLDER_LOADING_QUESTION);
@@ -65,6 +81,11 @@ const CollaborationContextProvider = ({children} : {children: ReactNode}) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const socketState: SocketStateType = {
     socket, setSocket
+  }
+
+  const [matchedUser, setMatchedUser] = useState<User | null>(null)
+  const matchedUserState: MatchedUserType = {
+    matchedUser, setMatchedUser
   }
 
   // connects to socket upon creating the context
@@ -78,7 +99,7 @@ const CollaborationContextProvider = ({children} : {children: ReactNode}) => {
   }, [])
 
   return (
-      <CollaborationContext.Provider value={{codeEditingAreaState, questionAreaState, socketState}}>
+      <CollaborationContext.Provider value={{codeEditingAreaState, questionAreaState, socketState, matchedUserState}}>
         {children}
       </CollaborationContext.Provider>
     );

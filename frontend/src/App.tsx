@@ -16,6 +16,7 @@ import WaitForMatchingPage from "./pages/matching-service/WaitForMatchingPage";
 import MatchingFailedPage from "./pages/matching-service/MatchingFailedPage";
 import GetReadyPage from "./pages/matching-service/GetReadyPage";
 import CollaborationPage from "./pages/collaboration-service/CollaborationPage";
+import { CollaborationContextProvider } from "./contexts/CollaborationContext";
 
 /**
  * A wrapper around routes that should only be accessed by logged-in users.
@@ -176,7 +177,9 @@ function App() {
           />
           <Route path="/collaboration" element={
             <PrivateRoute>
-              <CollaborationPage />
+              <CollaborationContextProvider>
+                <CollaborationPage />
+              </CollaborationContextProvider>
             </PrivateRoute>
           }
           />

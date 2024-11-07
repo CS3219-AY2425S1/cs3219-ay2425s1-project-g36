@@ -1,7 +1,7 @@
 import AceEditor from "react-ace";
 import { Button } from "../ui/button";
 import LanguageSelectionButton from "./LanguageSelectionButton";
-import { ProgrammingLanguages } from "./ProgrammingLanguages";
+import { ProgrammingLanguage, ProgrammingLanguages } from "./ProgrammingLanguages";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@rad
 import { AceEditorThemes } from "./AceEditorThemes";
 import { useCollaborationContext } from "@/contexts/CollaborationContext";
 import { DEFAULT_CODE_EDITOR_SETTINGS } from "./CodeEditorSettings";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 // Ace Editor Modes
 import "ace-builds/src-noconflict/mode-c_cpp";
@@ -30,17 +31,23 @@ import "ace-builds/src-noconflict/theme-terminal";
 const SAVE_INTERVAL_MS = 2000;
 
 export default function CodeEditingArea({ roomId }: { roomId: string }) {
-  const { codeEditingAreaState, socketState } = useCollaborationContext();
+  const { codeEditingAreaState, socketState, matchedUserState } = useCollaborationContext();
+
   const {
     displayLanguageSelectionPanel, setDisplayLanguageSelectionPanel,
     displayEditorSettingsPanel, setDisplayEditorSettingsPanel,
     currentlySelectedLanguage, setCurrentSelectedLanguage,
     rawCode, setRawCode,
     editorSettings, setEditorSettings,
-    editorSettingValueBuffer, setEditorSettingValueBuffer
+    editorSettingValueBuffer, setEditorSettingValueBuffer,
+    runCodeResult, setRunCodeResult,
+    isCodeRunning, setIsCodeRunning
   } = codeEditingAreaState;
 
-  const { socket } = socketState;
+  const {socket } = socketState;
+  const { matchedUser } = matchedUserState 
+  const isLanguageChangeFromServer = useRef(false);
+  const { toast } = useToast();
 
   const languageSelectionPanel = () => {
     return (
@@ -111,16 +118,18 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
     window.setTimeout(getCodeFromBackend, retryTimeout);
   }, [socket, roomId])
 
-    // saves changes to db every 2 seconds
+  // saves changes to db every 2 seconds
   useEffect(() => {
     if (socket === null) return
-    const interval = setInterval(() => {
+
+    const handler = setTimeout(() => {
       socket.emit('save-document', rawCode)
     }, SAVE_INTERVAL_MS)
+
     return () => {
-      clearInterval(interval)
+      clearTimeout(handler)
     }
-  }, [socket])
+  }, [rawCode])
 
   // whenever socket receives changes, update the code in the editor.
   useEffect(() => {
@@ -132,6 +141,82 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
     socket.on('receive-changes', handler)
     return () => {
       socket.off('receive-changes', handler)
+    }
+
+  }, [socket])
+
+  // whenever client clicks 'run code' and runCodeResult changes, send the result to server
+  useEffect(() => {
+    if (socket === null) return
+    
+    socket.emit('run-code', runCodeResult)
+    
+  }, [runCodeResult])
+  
+  // whenever socket receives the updated code execution result, update runCodeResult
+  useEffect(() => {
+    if (socket === null) return
+    const handler = (runCodeResult: string) => {
+      setRunCodeResult(runCodeResult)
+    }
+
+    socket.on('run-code-result', handler)
+    return () => {
+      socket.off('run-code-result', handler)
+    }
+
+  }, [socket])
+  
+  // whenever 'isCodeRunning' state changes, send this new state to the other user
+  useEffect(() => {
+    if (socket === null) return
+    
+    socket.emit('update-isCodeRunning', isCodeRunning)
+    
+  }, [isCodeRunning])
+  
+  // whenever socket receives the updated 'isCodeRunning', update it
+  useEffect(() => {
+    if (socket === null) return
+    const handler = (isCodeRunning: boolean) => {
+      setIsCodeRunning(isCodeRunning)
+    }
+
+    socket.on('update-isCodeRunning', handler)
+    return () => {
+      socket.off('update-isCodeRunning', handler)
+    }
+
+  }, [socket])
+
+  // whenever user changes language, send the new language to the server
+  useEffect(() => {
+    if (socket === null || isLanguageChangeFromServer.current) {
+      // to prevent infinite loop between 'change-prog-language' and 'update-prog-language' events
+      isLanguageChangeFromServer.current = false
+      return
+    }
+    
+    socket.emit('change-prog-language', currentlySelectedLanguage)
+  }, [currentlySelectedLanguage])
+
+  // whenever socket receives the updated programming language, update currentlySelectedLanguage
+  useEffect(() => {
+    if (socket === null) return
+    const handler = (updatedLanguage: ProgrammingLanguage) => {
+      isLanguageChangeFromServer.current = true
+      setCurrentSelectedLanguage(updatedLanguage)
+
+      toast({
+        description: `${matchedUser?.username} has changed the prog language to ${updatedLanguage.name}`,
+        duration: 2500,
+        className: "bg-gray-800 text-white",
+      });
+    }
+
+    socket.on('update-prog-language', handler)
+    return () => {
+      socket.off('update-prog-language', handler)
     }
 
   }, [socket])

@@ -1,5 +1,7 @@
 import { Router, Request, Response } from "express";
 import collabStore from '../utils/collabStore'
+import axios from "axios";
+import { JDOODLE_CLIENT_ID, JDOODLE_CLIENT_SECRET_KEY } from "../../config";
 
 const router = Router()
 
@@ -71,5 +73,46 @@ router.get("/in-store/:id", (req: Request, res: Response): any => {
         message: "The user is not in the collab store"
     })
 }); 
+
+// Sends API request to JDoodle to execute code in a sandboxed environment
+router.post("/run-code", async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { script, stdin, language, versionIndex } = req.body;
+
+        console.log("sending API request to JDoodle");
+        
+        const response = await axios.post("https://api.jdoodle.com/v1/execute", {
+            clientId: JDOODLE_CLIENT_ID,  
+            clientSecret: JDOODLE_CLIENT_SECRET_KEY,
+            script: script,             
+            stdin: stdin,               
+            language: language,         
+            versionIndex: versionIndex
+        }, {
+            headers: { "Content-Type": "application/json" }
+        });
+        
+        console.log("api request to JDoodle is successful")
+        res.status(200).send(response.data);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+})
+
+// Checks how many API calls to JDoodle you have made today
+// Note that in one day, you can make max 20 calls. Resets at Singapore time 0800
+router.post('/check-credits-spent', async (req: Request, res: Response) => {
+    const requestBody = {
+        clientId: JDOODLE_CLIENT_ID,
+        clientSecret: JDOODLE_CLIENT_SECRET_KEY
+    }
+
+    try {
+        const response = await axios.post("https://api.jdoodle.com/v1/credit-spent", requestBody)
+        res.status(200).send(response.data)
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+})
 
 export default router

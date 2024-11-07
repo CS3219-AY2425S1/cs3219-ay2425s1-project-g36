@@ -256,9 +256,9 @@ export const startConfirmation = async () => {
                     const roomId = uuidv4() // give both users a room Id to collaborate 
                     const question_topics = findCommonTopics(user, matchedUser)
                     const question_difficulties = findCommonDifficulties(user, matchedUser)
-    
+                    
                     // matching-service sends information to collab-service using kafka 
-                    await sendCollaborationMessage(user.id, matchedUser.id, roomId, question_topics, question_difficulties)
+                    await sendCollaborationMessage(user.id, matchedUser.id, roomId, question_topics, question_difficulties, user.progLangs, matchedUser.progLangs)
                 } else {
                     // Keep waiting and update the user's status
                     console.log(`User ${user.email} has confirmed the match, waiting for ${matchedUser.email} to confirm.`);
@@ -326,15 +326,17 @@ export const sendConfirmationMessage = async (userId: string, matchedUserId: str
  * @param question_topics The common topics between the users
  * @param question_difficulties The common difficulties between the users
  */
-export const sendCollaborationMessage = async (user1_id: string, user2_id: string, roomId: string, question_topics: string[], question_difficulties: string[]) => {
-    if (user1_id === null || user2_id === null || roomId === null || question_topics.length === 0 || question_difficulties.length === 0) return
+export const sendCollaborationMessage = async (user1_id: string, user2_id: string, roomId: string, question_topics: string[], question_difficulties: string[], user1_progLangs: string[], user2_progLangs: string[]) => {
+    if (user1_id === null || user2_id === null || roomId === null || question_topics.length === 0 || question_difficulties.length === 0 || user1_progLangs.length === 0 || user2_progLangs.length === 0) return
     
     const message = JSON.stringify({
         user1_id,
         user2_id,
         roomId,
         question_topics,
-        question_difficulties
+        question_difficulties,
+        user1_progLangs,
+        user2_progLangs
     })
 
     await producer.send({

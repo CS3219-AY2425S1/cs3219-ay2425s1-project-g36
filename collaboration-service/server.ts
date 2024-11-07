@@ -6,6 +6,7 @@ import { MongoServerError } from "mongodb";
 import { DocumentModel, DocumentType } from './src/models/document'
 import { WEBSOCKET_PORT, COLLABORATION_SERVICE_MONGODB_URI, FRONTEND_PORT, COLLABORATION_SERVICE_PORT } from './config'
 import { listenToMatchingService } from './src/kafka/collabController'
+import { ProgrammingLanguage } from './src/models/ProgrammingLanguage'
 
 import routes from './src/routes/collabRoute'
 
@@ -66,6 +67,20 @@ io.on("connection", socket => {
                 await DocumentModel.findByIdAndUpdate(documentId, { data })
             })
 
+            socket.on('run-code', (runCodeResult: string, isCodeRunning: boolean) => {
+                // when server receives the new runCodeResult, broadcast to the document the result
+                socket.broadcast.to(documentId).emit('run-code-result', runCodeResult, isCodeRunning)
+            })
+
+            socket.on('change-prog-language', (progLanguage: ProgrammingLanguage) => {
+                // when server receives the new programming language, broadcast to the document the new language
+                socket.broadcast.to(documentId).emit('update-prog-language', progLanguage)
+            })
+
+            socket.on('update-isCodeRunning', (isCodeRunning: boolean) => {
+                socket.broadcast.to(documentId).emit('update-isCodeRunning', isCodeRunning)
+            })
+            
             socket.on('send-chat-message', (chatMessage: ChatMessage) => {
                 // when server receives a chat message from client, server will broadcast the chat message
                 socket.broadcast.to(documentId).emit("receive-chat-message", chatMessage)

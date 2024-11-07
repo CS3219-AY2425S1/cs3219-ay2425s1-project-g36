@@ -33,6 +33,10 @@ export const listenToMatchingService = async () => {
             const user2_id = body.user2_id
             const roomId = body.roomId
 
+            // Selects a random common programming language
+            // matchingController guarantees that the 2 users will have at least 1 common progLang
+            const selectedProgLang: string = selectCommonProgLang(body.user1_progLangs, body.user2_progLangs)
+
             // Based on the topics and difficulties, query database and retrieve a question
             const question_topics: string[] = body.question_topics
             const question_difficulties: string[] = body.question_difficulties
@@ -48,13 +52,15 @@ export const listenToMatchingService = async () => {
                 userId : user1_id,
                 matchedUserId: user2_id,
                 roomId: roomId,
-                questionId: selectedQuestionId
+                questionId: selectedQuestionId,
+                progLang: selectedProgLang
             })
             collabStore.addUser(user2_id, {
                 userId : user2_id,
                 matchedUserId: user1_id,
                 roomId: roomId,
-                questionId: selectedQuestionId
+                questionId: selectedQuestionId,
+                progLang: selectedProgLang
             })
             
             // nice way to view the contents of collab store
@@ -62,6 +68,12 @@ export const listenToMatchingService = async () => {
             collabStore.printContents()
         }
     })
+}
+
+const selectCommonProgLang = (user1_progLang: string[], user2_progLang: string[]) => {
+    const commonProgLangs = user1_progLang.filter(lang => user2_progLang.includes(lang))
+    const selectedProgLang = commonProgLangs[Math.floor(Math.random() * commonProgLangs.length)] 
+    return selectedProgLang
 }
 
 const getQuestionId = async (question_topics: string[], question_difficulties: string[]): Promise<number | null> => {

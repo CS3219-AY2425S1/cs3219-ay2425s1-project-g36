@@ -31,6 +31,7 @@ class CollabStore {
             matchedUserId: value.matchedUserId,
             roomId: value.roomId,
             questionId: value.questionId,
+            progLang: value.progLang
         }));
         
         console.table(contents);

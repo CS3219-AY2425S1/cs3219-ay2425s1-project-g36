@@ -102,7 +102,7 @@ async function sendLogoutRequest() {
 
 async function getUserById(id: string) {
   try {
-    console.log(USERS_BASE_URL + `/${id}`);
+    // console.log(USERS_BASE_URL + `/${id}`);
     const response = await api.get(USERS_BASE_URL + `/${id}`)
     return {status: response.status, message: response.data.message, data: response.data.data};
   } catch (error : any) {
