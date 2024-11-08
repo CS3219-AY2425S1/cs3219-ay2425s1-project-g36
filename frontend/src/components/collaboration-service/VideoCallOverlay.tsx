@@ -168,15 +168,28 @@ export default function Component() {
         {/* Start Call Button */}
         {!isCallActive && !incomingCall && (
           <div className="flex justify-center space-x-4">
-            <Button onClick={startCall} disabled={isConnecting} className="w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 transition-colors duration-200 flex items-center justify-center">
+            <Button
+              onClick={startCall}
+              disabled={isConnecting}
+              variant="ghost"
+              size="icon"
+              className="text-green-600 hover:text-green-700 hover:bg-green-100"
+              aria-label="Start video call"
+            >
               {isConnecting ? (
-                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                <Phone className="w-8 h-8 text-white" />
+                <Phone className="w-5 h-5" />
               )}
             </Button>
-            {/* <Button onClick={simulateIncomingCall} className="w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center">
-              <PhoneCall className="w-8 h-8 text-white" />
+            {/* <Button
+              onClick={simulateIncomingCall}
+              variant="ghost"
+              size="icon"
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-100"
+              aria-label="Simulate incoming call"
+            >
+              <PhoneCall className="w-5 h-5" />
             </Button> */}
           </div>
         )}
@@ -245,6 +258,92 @@ export default function Component() {
       </div>
     </div>
   )
+
+  // return (
+  //   <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+  //     <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
+  //       {/* <h1 className="text-2xl font-bold mb-4">Video Call Interface</h1> */}
+
+  //       {/* Start Call Button */}
+  //       {!isCallActive && !incomingCall && (
+
+  //         <Button onClick={startCall} disabled={isConnecting} className="w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 transition-colors duration-200 flex items-center justify-center">
+  //           {/* {isConnecting ? (
+  //             <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+  //           ) : (
+  //             <Phone className="w-8 h-8 text-white" />
+  //           )} */}
+  //         </Button>
+  //         {/* <Button onClick={simulateIncomingCall} className="w-16 h-16 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center">
+  //           <PhoneCall className="w-8 h-8 text-white" />
+  //         </Button> */}
+
+  //       )}
+
+  //       {/* Incoming Call UI */}
+  //       {incomingCall && (
+  //         <div className="fixed inset-x-0 bottom-4 flex justify-center items-center">
+  //           <div className="bg-white rounded-lg shadow-xl p-4 flex items-center space-x-4">
+  //             <div className="flex-shrink-0">
+  //               <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center">
+  //                 <User className="h-6 w-6 text-gray-600" />
+  //               </div>
+  //             </div>
+  //             <div className="flex-grow">
+  //               <h3 className="text-lg font-semibold">Incoming Call</h3>
+  //               <p className="text-sm text-gray-500">Matched User is calling...</p>
+  //             </div>
+  //             <div className="flex-shrink-0 space-x-2">
+  //               <Button onClick={rejectCall} variant="destructive" size="sm">
+  //                 <PhoneOff className="h-4 w-4 mr-2" />
+  //                 Reject
+  //               </Button>
+  //               <Button onClick={answerIncomingCall} variant="default" size="sm">
+  //                 <PhoneCall className="h-4 w-4 mr-2" />
+  //                 Answer
+  //               </Button>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       )}
+
+  //       {/* Active Call UI */}
+  //       {isCallActive && (
+  //         <div className={`fixed ${isMinimized ? 'bottom-4 right-4' : 'inset-0'} flex items-center justify-center bg-black bg-opacity-50 transition-all duration-300 ease-in-out`}>
+  //           <div className={`bg-white rounded-lg shadow-xl overflow-hidden ${isMinimized ? 'w-64' : 'w-full max-w-2xl h-3/4 max-h-[600px]'}`}>
+  //             <div className="bg-gray-800 p-2 flex justify-between items-center">
+  //               <span className="text-white font-semibold">Active Call</span>
+  //               <div className="flex items-center space-x-2">
+  //                 {isMinimized && (
+  //                   <Button variant="ghost" size="icon" onClick={toggleOtherUser} className="text-white hover:text-gray-300">
+  //                     <User className="h-4 w-4" />
+  //                   </Button>
+  //                 )}
+  //                 <Button variant="ghost" size="icon" onClick={toggleMinimize} className="text-white hover:text-gray-300">
+  //                   {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+  //                 </Button>
+  //                 <Button variant="ghost" size="icon" onClick={endCall} className="text-white hover:text-gray-300">
+  //                   <X className="h-4 w-4" />
+  //                 </Button>
+  //               </div>
+  //             </div>
+
+  //             {(!isMinimized || (isMinimized && showOtherUser)) && (
+  //               <div className={`bg-gray-900 ${isMinimized ? 'h-36' : 'h-full'} flex items-center justify-center relative`}>
+  //                 <video className="w-full h-full object-cover" autoPlay muted loop ref={myVideo}></video>
+  //                 {!isMinimized && (
+  //                   <div className="absolute bottom-4 right-4 w-32 h-24 bg-gray-800 rounded-lg overflow-hidden">
+  //                     <video className="w-full h-full object-cover" autoPlay muted loop ref={userVideo}></video>
+  //                   </div>
+  //                 )}
+  //               </div>
+  //             )}
+  //           </div>
+  //         </div>
+  //       )}
+  //     </div>
+  //   </div>
+  // )
 
   // useEffect(() => {
   //   const handleEscape = (event: KeyboardEvent) => {
