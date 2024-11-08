@@ -85,6 +85,22 @@ io.on("connection", socket => {
                 // when server receives a chat message from client, server will broadcast the chat message
                 socket.broadcast.to(documentId).emit("receive-chat-message", chatMessage)
             })
+
+            // For calling feature
+
+            socket.emit('me', socket.id);
+
+            socket.on('disconnect', () => {
+                socket.broadcast.emit('callEnded');
+            })
+
+            socket.on('callUser', ({ data }) => {
+                io.to(data.userToCall).emit('callUser', { signal: data.signalData, from: data.from, name: data.name });
+            })
+
+            socket.on('answerCall', (data) => {
+                io.to(data.to).emit('callAccepted', data.signal);
+            })
         }
     })
 })

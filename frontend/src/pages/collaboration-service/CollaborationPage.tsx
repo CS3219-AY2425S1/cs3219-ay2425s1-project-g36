@@ -14,6 +14,7 @@ import { getCollabInfo, isUserInCollabStore, removeUserFromCollabStore } from "@
 import { useCollaborationContext } from "@/contexts/CollaborationContext";
 import { executeCodeInSandboxEnvironment, getCreditsSpent } from "@/api/collaboration-service/CollaborationService";
 import { ProgrammingLanguage, ProgrammingLanguages } from "@/components/collaboration-service/ProgrammingLanguages";
+import VideoCallOverlay from "@/components/collaboration-service/VideoCallOverlay";
 
 export default function CollaborationPage() {
   const [roomId, setRoomId] = useState<string | null>(null)
@@ -177,6 +178,7 @@ export default function CollaborationPage() {
         />
         <Button variant="destructive" className="btnred mt-16 ml-auto text-white" onClick={endSession}>End session</Button>
         <Button variant="outline" className="ml-6" onClick={handleRunCode} disabled={isCodeRunning}>Run code</Button>
+        <VideoCallOverlay />
       </MainContainer>
     </>
   )
