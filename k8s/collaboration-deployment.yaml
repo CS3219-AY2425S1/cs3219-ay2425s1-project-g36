@@ -23,7 +23,7 @@ spec:
         io.kompose.service: collaboration
     spec:
       containers:
-        - image: jayee230/cs3219-collab:v1.1
+        - image: jayee230/cs3219-collab:v1.2
           name: collaboration-service-container
           resources:
             requests:
