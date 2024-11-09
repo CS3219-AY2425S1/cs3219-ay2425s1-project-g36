@@ -19,7 +19,7 @@ app.use(express.json());
 
 const corsOptions = {
     // origin: 'http://localhost:5173',
-    origin: 'http://frontend:5173',
+    origin: 'http://35.247.176.23:5173',
     optionsSuccessStatus: 200,
     credentials: true
 }

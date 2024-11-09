@@ -12,7 +12,7 @@ app.use(express.json());
 // communication between microservices
 const corsOptions = {
     // origin: ['http://localhost:5173', 'http://localhost:3002'],
-    origin: ['http://frontend:5173', 'http://collaboration:3002'],
+    origin: ['http://35.247.176.23:5173', 'http://35.198.205.238:3002'],
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 

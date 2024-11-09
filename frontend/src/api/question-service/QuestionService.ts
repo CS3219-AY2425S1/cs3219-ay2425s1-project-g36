@@ -9,7 +9,7 @@ import { EMPTY_QUESTION, fromQuestionList, Question, toQuestionObject } from "./
  * URL of question service microservice to be used.
  */
 // const QUESTION_SERVICE_URL = "http://localhost:3000/";
-const QUESTION_SERVICE_URL = "http://question:3000/";
+const QUESTION_SERVICE_URL = "http://34.143.254.53:3000/";
 
 const api = axios.create({
   baseURL: QUESTION_SERVICE_URL,

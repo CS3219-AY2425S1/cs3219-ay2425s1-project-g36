@@ -19,7 +19,7 @@ app.get('/', (req: Request, res: Response) => {
 
 const corsOptions = {
     // origin: 'http://localhost:5173',
-    origin: 'http://frontend:5173',
+    origin: 'http://35.247.176.23:5173',
     credentials: true // allow for sending JWT cookies
 }
 

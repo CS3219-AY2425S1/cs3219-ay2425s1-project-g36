@@ -2,7 +2,7 @@ import axios from "axios";
 import { SelectedDifficultyData } from "@/components/matching-service/DifficultySelectionBox";
 
 // const MATCHING_SERVICE_URL = "http://localhost:5000/";
-const MATCHING_SERVICE_URL = "http://matching:5000/";
+const MATCHING_SERVICE_URL = "http://34.87.6.214:5000/";
 const MATCHING_BASE_URL = "/matching";
 const START_MATCHING_URL = "/start_matching";
 const CONFIRM_MATCH_URL = "/check_confirmation_state";
