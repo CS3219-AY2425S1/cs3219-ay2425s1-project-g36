@@ -23,7 +23,7 @@ spec:
         io.kompose.service: collaboration
     spec:
       containers:
-        - image: jayee230/cs3219-collab:v1.0
+        - image: jayee230/cs3219-collab:v1.1
           name: collaboration-service-container
           resources:
             requests:
@@ -50,6 +50,28 @@ spec:
               name: collaboration-cm0
             - mountPath: /usr/src/collaboration-service/node_modules
               name: collaboration-claim1
+          env:
+            - name: COLLABORATION_SERVICE_MONGODB_URI # env variable name
+              valueFrom:
+                secretKeyRef:
+                  name: collaboration-service-mongodb-uri
+                  key: COLLABORATION_SERVICE_MONGODB_URI
+            - name: JDOODLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: jdoodle-client-id
+                  key: JDOODLE_CLIENT_ID
+            - name: JDOODLE_CLIENT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jdoodle-client-secret-key
+                  key: JDOODLE_CLIENT_SECRET_KEY
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-api-key
+                  key: OPENAI_API_KEY
+
       restartPolicy: Always
       volumes:
         - configMap:

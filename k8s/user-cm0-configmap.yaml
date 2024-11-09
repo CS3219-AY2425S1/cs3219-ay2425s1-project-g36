@@ -1,6 +1,15 @@
 apiVersion: v1
 data:
   .dockerignore: node_modules
+  .env: |-
+    USER_SERVICE_MONGODB_URI=mongodb+srv://tiongMax:icandoit@clustermax.mnir8bt.mongodb.net/?retryWrites=true&w=majority&appName=ClusterMax
+    BLIST_MONGODB_URI=mongodb+srv://jayee:Jayee230@blacklist.njamd.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist
+    PORT=4000
+    JWT_SECRET=eW9k//3r3K9sQbmxFp8Bv8+OubhP8L1quvJygsxlabQ=
+    NODE_ENV="development"
+
+    EMAIL=peerprep36@gmail.com
+    PASSWORD=dklahakofezvgssu
   .env.sample: |-
     USER_SERVICE_MONGODB_URI="use ur own mongodb uri"
     PORT=4000
@@ -52,10 +61,12 @@ data:
     WORKDIR /usr/src/user-service
     COPY package.json /usr/src/user-service/package.json
     COPY package-lock.json /usr/src/user-service/package-lock.json
-    RUN npm install && echo "npm install completed"
+    RUN npm install
+    RUN npm install -g nodemon ts-node typescript
     COPY . /usr/src/user-service
     EXPOSE 4000
-    CMD ["npm", "run", "dev"]
+    # CMD ["npm", "run", "dev"]
+    CMD ["sh", "-c", "npm install && npm run dev"]
   README.MD: "# PeerPrep Backend for User Service - Developer Readme \n\n## Quick Start\n\n- This backend service uses <b>npm</b> as the package manager\n- Why not yarn? Because i don't like.\n\n### How to run backend server\n\n+ 1. Run `npm i` in the `user-service` directory to install dependencies\n+ 2. Add the `USER_SERVICE_MONGODB_URL` (which max has sent in tele chat) into the `.env` file (follow .env.sample)\n+ 3. Run `npm run dev` (make sure you are in the `/user-service/` directory)\n    - If it works, you should see the following console logs in your terminal\n  ```\n        Server is running on port 4000\n        MongoDB connected: ac-ofwon3u-shard-00-01.mnir8bt.mongodb.net\n  ```\n4. FYI: I used the nodemon dependency so that you can save your code changes and the backend server will automatically restart (observe your terminal for more information)\n\nCredit: Zac\n\n### How to run the containerized backend server with docker:\n - 1. Install docker on your device: [Docker](https://www.docker.com)\n - 2. Setup the `.env` file as the above paragraph mentioned\n - 3. Run `npm run docker-build-image` to build the image (named `user-service-image`)\n - 4. Run `npm run docker-create-container` to create a default container (named `user-service`). This will create and run the default container. Now the server should be accessible via the port `4000`.\n - 5. Run `npm run docker-start` to (re)start the already-created default container. \n - 6. Run `npm run docker-stop` to stop the default container.\n - Note: On some Linux OS, executing docker commands may require root permission. If you see permission errors such as `permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: ...` when running any of the commands, please try adding `sudo` before the commands or run `sudo su` before running the commands.\n\n Credit: Wang Zihan\n"
   package-lock.json: |
     {
@@ -2249,7 +2260,6 @@ data:
           "resolved": "https://registry.npmjs.org/nodemon/-/nodemon-3.1.7.tgz",
           "integrity": "sha512-hLj7fuMow6f0lbB0cD14Lz2xNjwsyruH251Pk4t/yIitCFJbmY1myuLlHm/q06aST4jg6EgAh74PIBBrRqpVAQ==",
           "dev": true,
-          "license": "MIT",
           "dependencies": {
             "chokidar": "^3.5.2",
             "debug": "^4",

@@ -23,7 +23,7 @@ spec:
         io.kompose.service: user
     spec:
       containers:
-        - image: jayee230/cs3219-user:v1.0
+        - image: jayee230/cs3219-user:v1.1
           name: user-service-container
           resources:
             requests:

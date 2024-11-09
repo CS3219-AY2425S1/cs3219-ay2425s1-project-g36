@@ -1,9 +1,13 @@
 apiVersion: v1
 data:
   .dockerignore: node_modules
+  .env: |-
+    FRONTEND_ADDRESS=http://localhost:5173
+    PORT=5000
   .env.example: |-
     FRONTEND_ADDRESS=http://localhost:5173
     PORT=5000
+  .gitattributes: wait_for_kafka.sh text eol=lf
   .gitignore: |-
     node_modules/
 
@@ -50,11 +54,12 @@ data:
     COPY package-lock.json /usr/src/matching-service/package-lock.json
     COPY wait_for_kafka.sh /usr/src/matching-service/wait_for_kafka.sh
     RUN chmod +x /usr/src/matching-service/wait_for_kafka.sh
-    RUN npm install && echo "npm install completed"
+    RUN npm install
+    RUN npm install -g nodemon ts-node typescript
     COPY . /usr/src/matching-service
     EXPOSE 5000
     ENTRYPOINT ["/bin/bash", "/usr/src/matching-service/wait_for_kafka.sh"]
-    CMD ["npm", "run", "dev"]
+    CMD ["sh", "-c", "npm install && npm run dev"]
   README.md: "# PeerPrep Backend for Matching Service - Developer Readme\n\n## Quick Start\n - Install `npm` on your device.\n\n### Running the backend server\n - Run `npm i` in `./matching-service` to install the dependencies.\n - Use the `.env` file to change `FRONTEND_ADDRESS` and `PORT` if necessary (or the backend will use the default values `FRONTEND_ADDRESS=http://localhost:5173` and `PORT=5000`).\n - Run `npm run dev` in `./matching-service`. If it works, you will see `Server started. Port = xxxx` in the console.\n\n### How to run the containerized backend server with docker:\n - 1. Install docker on your device: [Docker](https://www.docker.com)\n - 2. Setup the `.env` file as the above paragraph mentioned\n - 3. Run `npm run docker-build-image` to build the image (named `matching-service-image`)\n - 4. Run `npm run docker-create-container` to create a default container (named `matching-service`). This will create and run the default container. Now the server should be accessible via the port `5000`.\n - 5. Run `npm run docker-start` to (re)start the already-created default container. \n - 6. Run `npm run docker-stop` to stop the default container.\n - Note: On some Linux OS, executing docker commands may require root permission. If you see permission errors such as `permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: ...` when running any of the commands, please try adding `sudo` before the commands or run `sudo su` before running the commands.\n"
   package-lock.json: |
     {
@@ -1673,7 +1678,7 @@ data:
         "target": "ES2023"
       }
     }
-  wait_for_kafka.sh: |-
+  wait_for_kafka.sh: |
     #!/bin/bash
     while ! nc -z kafka 9092; do
       echo "Waiting for Kafka..."

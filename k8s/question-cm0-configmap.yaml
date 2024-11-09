@@ -1,6 +1,7 @@
 apiVersion: v1
 data:
   .dockerignore: node_modules
+  .env: QUESTION_SERVICE_MONGODB_URL="mongodb+srv://root:admin@peerprep.reijg.mongodb.net/?retryWrites=true&w=majority&appName=PeerPrep"
   .env.example: |
     QUESTION_SERVICE_MONGODB_URL=the-question-service-mongodb-connection-URL-zac-gave-in-telegram
   .gitignore: |-
@@ -49,7 +50,7 @@ data:
     RUN npm install
     COPY . /usr/src/question-service
     EXPOSE 3000
-    CMD ["npm", "run", "dev"]
+    CMD ["sh", "-c", "npm install && npm run dev"]
   README.md: "# PeerPrep Backend for Question Service - Developer Readme \n\n## Quick Start\n\n- This backend service uses <b>npm</b> as the package manager\n- Why not yarn? Because I was too lazy to switch to yarn\n\n### How to run backend server\n\n1. run `npm i` in the `backend` directory to install dependencies\n2. Add the `QUESTION_SERVICE_MONGODB_URL` (which zac sent in tele chat) into the `.env` file\n3. Run `npm run dev` (make sure you are in the `backend` directory)\n    - If it works, you should see the following console logs in your terminal\n  ```\n    MongoDB URL:  <the URL>\n    App connected to database\n    App is listening to port: 3000\n  ```\n4. FYI: I used the nodemon dependency so that you can save your code changes and the backend server will automatically restart (observe your terminal for more information)\n\n### How to run the containerized backend server with docker:\n - 1. Install docker on your device: [Docker](https://www.docker.com)\n - 2. Setup the `.env` file as the above paragraph mentioned\n - 3. Run `npm run docker-build-image` to build the image (named `question-service-image`)\n - 4. Run `npm run docker-create-container` to create a default container (named `question-service`). This will create and run the default container. Now the server should be accessible via the port `3000`.\n - 5. Run `npm run docker-start` to (re)start the already-created default container. \n - 6. Run `npm run docker-stop` to stop the default container.\n - Note: On some Linux OS, executing docker commands may require root permission. If you see permission errors such as `permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: ...` when running any of the commands, please try adding `sudo` before the commands or run `sudo su` before running the commands.\n\n### Things to take note if you face some issues running the application\n\n1. If you see the following, try connecting to VPN before running the application\n  ```\n    querySrv ETIMEOUT _mongodb._tcp.peerprep.reijg.mongodb.net\n  ```\n2. Any further troubles direct to @z_acwon_g on telegram (pls dont)\n\n### Example queries to run on Postman\n\n1. `GET http://localhost:3000/questions`\n    - Retrieves all the questions\n\n2. `GET http://localhost:3000/questions/:id`\n    - Retrieves a specific question by id\n\n3. `POST http://localhost:3000/questions`\n    - Create a question with a question JSON object\n    ```\n        {\n            \"title\": \"Word Search II\",\n            \"difficulty\": \"hard\",\n            \"description\": \"brute force is the way\",\n            \"topics\": [\"brute force\"]\n        }\n        \n        {\n            \"title\": \"N queens\",\n            \"difficulty\": \"hard\",\n            \"description\": \"I like searching through arrays\",\n            \"topics\": [\"DP\", \"array\"]\n        }\n            \n        {\n            \"title\": \"Longest Common Subsequence\",\n            \"difficulty\": \"medium\",\n            \"description\": \"DP is too easy\",\n            \"topics\": [\"stack\", \"DP\"]\n        }\n    ```\n\n4. `PUT http://localhost:3000/questions/:id`\n    - Update a question by id with a question JSON object\n\n5. `DELETE http://localhost:3000/questions/:id`\n    - Deletes a specific question by id"
   config.ts: |
     import dotenv from "dotenv";
@@ -1260,7 +1261,6 @@ data:
           "resolved": "https://registry.npmjs.org/nodemon/-/nodemon-3.1.7.tgz",
           "integrity": "sha512-hLj7fuMow6f0lbB0cD14Lz2xNjwsyruH251Pk4t/yIitCFJbmY1myuLlHm/q06aST4jg6EgAh74PIBBrRqpVAQ==",
           "dev": true,
-          "license": "MIT",
           "dependencies": {
             "chokidar": "^3.5.2",
             "debug": "^4",

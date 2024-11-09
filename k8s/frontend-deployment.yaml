@@ -35,15 +35,15 @@ spec:
               value: "true"
             - name: WDS_SOCKET_HOST
               value: 127.0.0.1
-          image: jayee230/cs3219-frontend:v1.0
+          image: jayee230/cs3219-frontend:v1.1
           name: frontend-container
           resources:
             requests:
-              cpu: "500m"       # Request for CPU (e.g., 500 millicores)
-              memory: "256Mi"   # Request for memory (e.g., 256Mi)
+              cpu: "1000m"       # Request for CPU (e.g., 500 millicores)
+              memory: "1Gi"   # Request for memory 
             limits:
-              cpu: "1000m"      # Limit for CPU (e.g., 1000 millicores)
-              memory: "512Mi"   # Limit for memory (e.g., 512Mi)
+              cpu: "2000m"      # Limit for CPU (e.g., 1000 millicores)
+              memory: "2Gi"   # Limit for memory
           ports:
             - containerPort: 5173
               protocol: TCP
