@@ -30,7 +30,7 @@ import "ace-builds/src-noconflict/theme-github_dark";
 import "ace-builds/src-noconflict/theme-twilight";
 import "ace-builds/src-noconflict/theme-terminal";
 
-const SAVE_INTERVAL_MS = 2000;
+const SAVE_INTERVAL_MS = 1000;
 
 export default function CodeEditingArea({ roomId }: { roomId: string }) {
   const { codeEditingAreaState, socketState, matchedUserState } = useCollaborationContext();

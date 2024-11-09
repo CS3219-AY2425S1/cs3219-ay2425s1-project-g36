@@ -57,8 +57,9 @@ export default function QuestionArea({questionId} : {questionId : string}) {
   const testInputs = question.testInputs
   const testOutputs = question.testOutputs
 
+  // This whole function is rendered in the main return function
   const testCases = (() => {
-    // this question does not have any testInputs yet
+    // This question does not have any testInputs (intended for some questions)
     if (testInputs.length === 0) {
       return <div>this question does not have any testInputs</div>
     }
@@ -68,71 +69,67 @@ export default function QuestionArea({questionId} : {questionId : string}) {
       return null; 
     }
 
+    // Code is running, wait for it to complete
     if (isCodeRunning) {
-      return null; // Code is running, wait for it to complete
+      return null;
     }
 
+    // User has not run code
     if (resultArray[0] === DEFAULT_RESULT) {
-      // User has not run code
       return (
-        <div className="mt-4 border rounded-lg overflow-hidden">
+        <div className="border rounded-lg overflow-hidden">
           <div className="bg-gray-100 p-4">
             <div className="text-lg font-semibold mb-2">Test Case Results:</div>
             <div className="space-y-2">
-              {testInputs.map((input, index) => (
-                <div key={index} className="flex items-center p-2 rounded bg-gray-300 text-black">
-                  <span>Test case {index + 1} input: {input}</span>
-                </div>
-              ))}
+              User has not executed code
             </div>
           </div>
         </div>
       );
     }
 
+    // User did not print an answer or printed >1 answer. Show all test cases fail.
     if (resultArray.length !== testOutputs.length) {
-      // User did not print an answer or printed >1 answer. Show all test cases fail.
       return (
         <div className="mt-4 border rounded-lg overflow-hidden">
-          <div className="bg-gray-100 p-4">
+          <div className="p-4 bg-red-100 text-red-800">
             <div className="text-lg font-semibold mb-2">Test Case Results:</div>
             <div className="space-y-2">
-              {testInputs.map((input, index) => (
-                <div key={index} className="flex items-center p-2 rounded bg-red-100 text-red-800">
-                  <XCircle className="w-5 h-5 mr-2 text-red-600" />
-                  <span>Test case {index + 1} input: fail</span>
-                </div>
-              ))}
+              <div className="flex items-center p-2 rounded">
+                <XCircle className="w-5 h-5 mr-2 text-red-600" />
+                <span>Test cases passed: 0 / {testOutputs.length}</span>
+              </div>
             </div>
           </div>
         </div>
       );
     }
 
-    const testCasesPassed = resultArray.map(
-      (result, index) => resultArray[index] === testOutputs[index]
-    );
+    // Happy path begins here
+    let noOfTestCasesPassed = 0
+    resultArray.forEach((result, index) => {
+      if (resultArray[index] === testOutputs[index]) {
+        noOfTestCasesPassed += 1
+      }
+    });
+
+    // boolean to indicate if user has passed **all** test cases
+    const passedAllTestCases = noOfTestCasesPassed === resultArray.length
 
     return (
       <div className="mt-4 border rounded-lg overflow-hidden">
-        <div className="bg-gray-100 p-4">
+        <div className={`p-4 ${
+          passedAllTestCases ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+        }`}>
           <div className="text-lg font-semibold mb-2">Test Case Results:</div>
           <div className="space-y-2">
-            {testCasesPassed.map((passed, index) => (
-              <div
-                key={index}
-                className={`flex items-center p-2 rounded ${
-                  passed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                }`}
-              >
-                {passed ? (
-                  <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                ) : (
-                  <XCircle className="w-5 h-5 mr-2 text-red-600" />
-                )}
-                <span>Test case {index + 1}: {passed ? "pass" : "fail"}</span>
-              </div>
-            ))}
+            <div className="flex items-center p-2 rounded">
+              {passedAllTestCases 
+                ? <CheckCircle className="w-5 h-5 mr-2 text-green-600" /> 
+                : <XCircle className="w-5 h-5 mr-2 text-red-600" />
+              }
+              <span>Test cases passed: {noOfTestCasesPassed} / {testOutputs.length}</span>
+            </div>
           </div>
         </div>
       </div>
