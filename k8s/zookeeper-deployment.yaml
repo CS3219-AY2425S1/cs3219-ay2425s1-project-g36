@@ -29,10 +29,10 @@ spec:
           image: confluentinc/cp-zookeeper 
           resources:
             requests:
-              memory: "2Gi"
+              memory: "1Gi"
               cpu: "1"
             limits:
-              memory: "4Gi"
+              memory: "2Gi"
               cpu: "2"
           livenessProbe:
             exec:

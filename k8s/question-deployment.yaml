@@ -27,11 +27,11 @@ spec:
           name: question-service-container
           resources:
             requests:
-              cpu: "500m"       # Request for CPU (e.g., 500 millicores)
-              memory: "512Mi"   # Request for memory 
+              cpu: "250m"       # Request for CPU (e.g., 500 millicores)
+              memory: "256Mi"   # Request for memory 
             limits:
-              cpu: "1000m"      # Limit for CPU (e.g., 1000 millicores)
-              memory: "1Gi"   # Limit for memory
+              cpu: "500m"      # Limit for CPU (e.g., 1000 millicores)
+              memory: "512Mi"   # Limit for memory
           ports:
             - containerPort: 3000
               protocol: TCP

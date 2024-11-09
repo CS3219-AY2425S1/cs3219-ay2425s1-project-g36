@@ -36,10 +36,10 @@ spec:
           command: ["bash", "-c", "unset KAFKA_PORT; /etc/confluent/docker/run"]
           resources:
             requests:
-              memory: "2Gi"
+              memory: "1Gi"
               cpu: "1"
             limits:
-              memory: "4Gi"
+              memory: "2Gi"
               cpu: "2"
           # livenessProbe:
           #   exec:
