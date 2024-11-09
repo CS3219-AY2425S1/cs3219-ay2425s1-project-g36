@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const USER_SERVICE_URL = "http://localhost:4000";
+// const USER_SERVICE_URL = "http://localhost:4000";
+const USER_SERVICE_URL = "http://user:4000";
 const USERS_BASE_URL = "/users";
 const AUTH_BASE_URL = "/authentication";
 const LOGIN_API = "/login";

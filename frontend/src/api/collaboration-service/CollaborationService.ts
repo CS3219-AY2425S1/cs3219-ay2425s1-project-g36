@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const COLLABORATION_SERVICE_URL = "http://localhost:3002/"
+// const COLLABORATION_SERVICE_URL = "http://localhost:3002/"
+const COLLABORATION_SERVICE_URL = "http://collaboration:3002/"
 const COLLABORATION_BASE_URL = "/collaboration"
 const REMOVE_USER_URL = "/remove"
 const IS_USER_IN_STORE_URL = "/in-store"

@@ -18,7 +18,8 @@ const app: Application = express();
 app.use(express.json());
 
 const corsOptions = {
-    origin: 'http://localhost:5173',
+    // origin: 'http://localhost:5173',
+    origin: 'http://frontend:5173',
     optionsSuccessStatus: 200,
     credentials: true
 }
@@ -40,7 +41,8 @@ mongoose
 
 const io = new Server(WEBSOCKET_PORT, {
     cors: {
-        origin: `http://localhost:${FRONTEND_PORT}`,
+        // origin: `http://localhost:${FRONTEND_PORT}`,
+        origin: `http://frontend:${FRONTEND_PORT}`,
         methods: ["GET", "POST"],
     },
 })

@@ -91,7 +91,8 @@ const CollaborationContextProvider = ({children} : {children: ReactNode}) => {
   // connects to socket upon creating the context
   useEffect(() => {
     if(socket !== null) return;
-    const s = io("http://localhost:3001")
+    // const s = io("http://localhost:3001")
+    const s = io("http://collaboration:3001")
     setSocket(s)
     return () => {
       s.disconnect()
