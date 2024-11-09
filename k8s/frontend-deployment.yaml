@@ -50,7 +50,7 @@ spec:
           volumeMounts:
             - mountPath: /usr/src/frontend/config
               name: frontend-cm0
-            - mountPath: /usr/src/frontend/config
+            - mountPath: /usr/src/frontend/config1
               name: frontend-claim1
       restartPolicy: Always
       volumes:
