@@ -6,10 +6,8 @@ import FilterPopover from "@/components/question-service/list-question-page/Filt
 import ListQuestionTable from "@/components/question-service/list-question-page/ListQuestionTable";
 import { Button } from "@/components/ui/button";
 import SearchInput from "@/components/ui/SearchInput";
-import { ToastAction } from "@/components/ui/toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { CircleX, TriangleAlert } from "lucide-react";
+import { CircleX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 

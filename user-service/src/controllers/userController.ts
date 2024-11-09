@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 
 import User from '../models/userModel';
 import generateTokenAndSetCookie from '../lib/generateToken';
+import AttemptHistory from "../models/attemptHistoryModel";
 
 export async function createUser(req: Request, res: Response) {
   try {
@@ -42,7 +43,7 @@ export async function createUser(req: Request, res: Response) {
     const newUser = new User({
       username,
       email,
-      password: hashedPassword,
+      password: hashedPassword
     });
   
     if (newUser) {
@@ -209,5 +210,60 @@ export async function updateUserPrivilege(req : Request, res : Response) {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Unknown error when updating user privilege!" });
+  }
+}
+
+export async function getUserAttempts(req: Request, res: Response) {
+  try {
+    const userId = req.params.id;
+
+    // Validate if the userId is a valid MongoDB ObjectId
+    if (!isValidObjectId(userId)) {
+      return res.status(404).json({ message: `User ${userId} not found hu` });
+    }
+
+    // Find the user by ID
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({ message: `User ${userId} not found huhu` });
+    }
+
+    // Retrieve the attemptHistory and send it in the response
+    const attemptHistory = user.attemptHistory;
+    return res.status(200).json({
+      message: "Found user's attempt history",
+      data: attemptHistory,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Unknown error when getting user!" });
+  }
+}
+
+export async function updateUserQuestionAttempt(req: Request, res: Response) {
+  try {
+    const { questionId, questionTitle, rawCode, language } = req.body;
+    const userId = req.user._id;
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const attempt = new AttemptHistory({
+      questionId: parseInt(questionId), 
+      questionTitle,
+      language,
+      code: rawCode,
+    });
+
+    // Append the attempt to the user's history
+    user.attemptHistory.push(attempt);
+
+    await user.save();
+    return res.status(200).json({ message: "Attempt history updated successfully", attemptHistory: user.attemptHistory });
+  } catch (error) {
+    console.log("error")
+    console.error("Error updating user attempt history:", error);
+    res.status(500).json({ message: "Server error", error });
   }
 }

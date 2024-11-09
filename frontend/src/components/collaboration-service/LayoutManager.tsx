@@ -9,7 +9,17 @@ enum LayoutModes {
   FullPage_Code,
 }
 
-export default function LayoutManager({codeEditingArea, questionArea} : {codeEditingArea: ReactNode, questionArea: ReactNode}) {
+/**
+ * Creates the overall layout of the collaboration service interface, with the following props:
+ * 
+ * - `codeEditingArea`: The code editing area of the collaboration service interface.
+ * - `questionArea`: The question area of the collaboration service interface.
+ * - `otherButtons`: Utility buttons to be displayed alongside the layout change buttons, such as
+ *   `End session` and `Run code` buttons.
+ * 
+ * @returns The overall layout of the collaboration service interface.
+ */
+export default function LayoutManager({codeEditingArea, questionArea, otherButtons} : {codeEditingArea: ReactNode, questionArea: ReactNode, otherButtons: ReactNode}) {
 
   const [layoutMode, setLayoutMode] = useState<LayoutModes>(LayoutModes.VerticallySplitView);
     
@@ -91,7 +101,12 @@ export default function LayoutManager({codeEditingArea, questionArea} : {codeEdi
   return (
     <>
       <div>
-        {renderLayoutOperation()}
+        <div className="flex flex-col gap-2 md:flex-row">
+          <div>{renderLayoutOperation()}</div>
+          <div className="flex-grow-0 md:flex-1"></div>
+          { otherButtons }
+        </div>
+
         <div className="mt-5 mb-5"/>
         {renderLayoutMode()}
       </div>

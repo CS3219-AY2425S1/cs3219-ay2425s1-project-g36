@@ -74,6 +74,35 @@ router.get("/in-store/:id", (req: Request, res: Response): any => {
     })
 }); 
 
+// update prog lang in collab store
+router.put("/:id", (req: Request, res: Response): any => {
+    const id = req.params.id;
+    const { progLang } = req.body
+
+    if (id === null) {
+        return res.status(400).send({
+            message: "You need to put a user ID in the URL"
+        })
+    }
+
+    const present = collabStore.hasUser(id)
+
+    if (!present) {
+        return res.status(404).send({
+            message: "The user is not in the collab store"
+        })
+    }
+
+    collabStore.updateUserProgLang(id, progLang)
+
+    console.log('after updating the user prog lang, the collab store is:')
+    collabStore.printContents()
+
+    return res.status(200).send({
+        message: "Updated user's prog lang"
+    })
+}); 
+
 // Sends API request to JDoodle to execute code in a sandboxed environment
 router.post("/run-code", async (req: Request, res: Response): Promise<void> => {
     try {

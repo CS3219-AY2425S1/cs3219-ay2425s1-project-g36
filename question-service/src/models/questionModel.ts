@@ -8,6 +8,8 @@ interface IQuestion extends Document {
     difficulty: "easy" | "medium" | "hard";
     topics?: Topic[];
     description: string;
+    testInputs: string[];
+    testOutputs: string[];
 }
 
 type Topic = typeof QUESTION_TOPICS[number]
@@ -40,6 +42,12 @@ const questionSchema = new mongoose.Schema(
         description: {
             type: String,
             required: true,
+        },
+        testInputs: {
+            type: [String]
+        },
+        testOutputs: {
+            type: [String]
         },
     },
     {

@@ -53,4 +53,5 @@ const ProgrammingLanguages : ProgrammingLanguage[] = [
 ].sort((first, second) => first.name.localeCompare(second.name));
 
 export { ProgrammingLanguages };
+
 export type { ProgrammingLanguage };

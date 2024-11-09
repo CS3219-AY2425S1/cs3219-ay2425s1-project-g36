@@ -32,6 +32,7 @@
     "express": "^4.21.1",
     "kafkajs": "^2.2.4",
     "mongoose": "^8.7.3",
+    "openai": "^4.71.0",
     "socket.io": "^4.8.1"
   }
 }

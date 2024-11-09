@@ -16,6 +16,7 @@ import WaitForMatchingPage from "./pages/matching-service/WaitForMatchingPage";
 import MatchingFailedPage from "./pages/matching-service/MatchingFailedPage";
 import GetReadyPage from "./pages/matching-service/GetReadyPage";
 import CollaborationPage from "./pages/collaboration-service/CollaborationPage";
+import AttemptedHistoryPage from "./pages/AttemptedHistoryPage";
 import { CollaborationContextProvider } from "./contexts/CollaborationContext";
 
 /**
@@ -152,6 +153,11 @@ function App() {
               nonAdminRoute={ <Navigate to="/questions" /> }
             />
           } />
+          <Route path="/attempts/:id" element={
+            <PrivateRoute>
+              <ViewQuestionPage hasCode={true}/>
+            </PrivateRoute>
+          } />
           <Route path="/matching/start" element={
             <PrivateRoute>
               <StartMatchingPage />
@@ -183,6 +189,12 @@ function App() {
             </PrivateRoute>
           }
           />
+          <Route path='/history' element={
+            <PrivateRoute>
+              <AttemptedHistoryPage />
+            </PrivateRoute>
+          }
+          /> 
           <Route path="*" Component={ ErrorPage } />
         </Routes>
       </BrowserRouter>

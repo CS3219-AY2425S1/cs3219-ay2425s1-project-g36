@@ -10,6 +10,8 @@ export interface Question {
   difficulty: TDifficulty;
   description: string;
   topics?: string[];
+  testInputs: string[];
+  testOutputs: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -23,6 +25,8 @@ export const EMPTY_QUESTION : Question = {
   difficulty: "easy",
   description: "",
   topics: [],
+  testInputs: [],
+  testOutputs: [],
   createdAt: "",
   updatedAt: "",
 }

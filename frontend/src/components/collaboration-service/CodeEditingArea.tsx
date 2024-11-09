@@ -11,6 +11,8 @@ import { useCollaborationContext } from "@/contexts/CollaborationContext";
 import { DEFAULT_CODE_EDITOR_SETTINGS } from "./CodeEditorSettings";
 import { useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { updateUserProgLang } from "@/api/collaboration-service/CollaborationService";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Ace Editor Modes
 import "ace-builds/src-noconflict/mode-c_cpp";
@@ -44,10 +46,11 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
     isCodeRunning, setIsCodeRunning
   } = codeEditingAreaState;
 
-  const {socket } = socketState;
+  const { socket } = socketState;
   const { matchedUser } = matchedUserState 
   const isLanguageChangeFromServer = useRef(false);
   const { toast } = useToast();
+  const { auth } = useAuth()
 
   const languageSelectionPanel = () => {
     return (
@@ -99,28 +102,34 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
     socket.emit('send-changes', rawCode);
   }
 
+  const hasGetDocumentEmitted = useRef(false);
+
   // upon entering the collaboration page, socket retrieves the document from db (if exists)
   // or creates a new one. Then, load the raw code to the code editor.
   useEffect(() => {
     if (rawCode !== "") return; // To make sure that the code in the editor doesn't lost when the user switches view in the collaboration frontend
-    const retryTimeout = 200; // Because the websocket requires time to connect, so here the frontend will retry again and again based on the timeout when the websocket is not connect, to make sure that the frontend will wait for the websocket to connect before getting code from backend.
-    const getCodeFromBackend = () => {
-      if (socket === null || !socket.connected) {
-        window.setTimeout(getCodeFromBackend, retryTimeout);
-        return;
-      }
-      socket.on('load-document', rawCode => {
-        console.log("code: " + (rawCode===undefined ? "undefined" : rawCode));
-        setRawCode(rawCode);
-      })
-      socket.emit('get-document', roomId)
+    if (socket === null || !socket.connected) return;
+    socket.on('load-document', rawCode => {
+      console.log("code: " + (rawCode===undefined ? "undefined" : rawCode));
+      setRawCode(rawCode);
+    })  
+    
+    // Emit only if hasn't been emitted already
+    if (!hasGetDocumentEmitted.current) {
+      console.log("invoked");
+      socket.emit('get-document', roomId);
+      hasGetDocumentEmitted.current = true;
     }
-    window.setTimeout(getCodeFromBackend, retryTimeout);
+  
+    // Cleanup function to avoid memory leaks
+    return () => {
+      socket.off('load-document');
+    };
   }, [socket, roomId])
 
   // saves changes to db every 2 seconds
   useEffect(() => {
-    if (socket === null) return
+    if (socket === null) return;
 
     const handler = setTimeout(() => {
       socket.emit('save-document', rawCode)
@@ -191,15 +200,28 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
 
   // whenever user changes language, send the new language to the server
   useEffect(() => {
-    if (socket === null || isLanguageChangeFromServer.current) {
-      // to prevent infinite loop between 'change-prog-language' and 'update-prog-language' events
-      isLanguageChangeFromServer.current = false
-      return
-    }
-    
-    socket.emit('change-prog-language', currentlySelectedLanguage)
-  }, [currentlySelectedLanguage])
-
+    const handleLanguageChange = async () => {
+      if (socket === null || isLanguageChangeFromServer.current) {
+        // Prevent infinite loop between 'change-prog-language' and 'update-prog-language' events
+        isLanguageChangeFromServer.current = false;
+        return;
+      }
+  
+      try {
+        // update collabStore to reflect the new progLang for both users
+        await updateUserProgLang(auth.id, currentlySelectedLanguage.name);
+        if (matchedUser) {
+          await updateUserProgLang(matchedUser._id, currentlySelectedLanguage.name);
+        }
+        socket.emit('change-prog-language', currentlySelectedLanguage);
+      } catch (error) {
+        console.error("Failed to update user programming language:", error);
+      }
+    };
+  
+    handleLanguageChange();
+  }, [currentlySelectedLanguage]);
+  
   // whenever socket receives the updated programming language, update currentlySelectedLanguage
   useEffect(() => {
     if (socket === null) return
@@ -285,7 +307,7 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
           mode={currentlySelectedLanguage.aceEditorModeName}
           onFocus={()=>{setDisplayLanguageSelectionPanel(false);setDisplayEditorSettingsPanel(false)}}
           width="100%"
-          height="800px"
+          height="600px"
           fontSize={editorSettings.fontSize}
           wrapEnabled={editorSettings.wrap}
           theme={editorSettings.theme.internalName}

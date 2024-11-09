@@ -17,6 +17,15 @@ class CollabStore {
         return this.collabStore.get(userId);
     }
 
+    updateUserProgLang(userId: string, progLang: string) {
+        const user = this.collabStore.get(userId)
+        if (user) {
+            user.progLang = progLang
+        } else {
+            console.warn(`User with ID ${userId} not found in collabStore.`);
+        }
+    }
+
     removeUser(userId: string) {
         this.collabStore.delete(userId);
     }

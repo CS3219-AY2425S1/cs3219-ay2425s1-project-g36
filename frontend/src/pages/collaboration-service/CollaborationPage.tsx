@@ -2,6 +2,7 @@ import LayoutManager from "@/components/collaboration-service/LayoutManager";
 import CodeEditingArea from "@/components/collaboration-service/CodeEditingArea";
 import QuestionArea from "@/components/collaboration-service/QuestionArea";
 import PageTitle from "@/components/common/PageTitle";
+import ChattingOverlay from "@/components/collaboration-service/communication/ChattingOverlay";
 import { useEffect, useState } from "react";
 import { fetchQuestion } from "@/api/question-service/QuestionService";
 import MainContainer from "@/components/common/MainContainer";
@@ -9,21 +10,22 @@ import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { getUserById } from "@/api/user-service/UserService";
+import { getUserById, updateUserAttemptHistory } from "@/api/user-service/UserService";
 import { getCollabInfo, isUserInCollabStore, removeUserFromCollabStore } from "@/api/collaboration-service/CollaborationService";
 import { useCollaborationContext } from "@/contexts/CollaborationContext";
 import { executeCodeInSandboxEnvironment, getCreditsSpent } from "@/api/collaboration-service/CollaborationService";
 import { ProgrammingLanguage, ProgrammingLanguages } from "@/components/collaboration-service/ProgrammingLanguages";
+import { formatRawCode } from "./LanguageScripts";
 
 export default function CollaborationPage() {
   const [roomId, setRoomId] = useState<string | null>(null)
   const [matchedUserId, setMatchedUserId] = useState<string | null>(null)
   const [questionId, setQuestionId] = useState<string | null>(null)
+  const [isUserLoading, setIsUserLoading] = useState(true)
+  const [isQuestionLoading, setIsQuestionLoading] = useState(true)
 
   const { auth } = useAuth()
   const navigate = useNavigate();
-  const [isUserLoading, setIsUserLoading] = useState(true)
-  const [isQuestionLoading, setIsQuestionLoading] = useState(true)
 
   const { codeEditingAreaState, matchedUserState, questionAreaState } = useCollaborationContext();
   
@@ -36,19 +38,19 @@ export default function CollaborationPage() {
   useEffect(() => {
     const checkIfUserInStore = async () => {
       if (auth.id === null) return
-
+      
       try {
         const response1 = await isUserInCollabStore(auth.id)
         if (response1.status === 200) {
           // Using the user's ID, retrieve collaboration details
           const response2 = await getCollabInfo(auth.id)
           const data = response2.data
-  
+          
           setRoomId(data.roomId)
           setMatchedUserId(data.matchedUserId)
           setQuestionId(data.questionId)
 
-          // fall back to C language if this fails
+          // fall back to the first language in ProgrammingLanguages if this fails
           const lang: ProgrammingLanguage = ProgrammingLanguages.find(lang => lang.name === data.progLang) || ProgrammingLanguages[0] 
 
           setCurrentSelectedLanguage(lang)
@@ -102,16 +104,25 @@ export default function CollaborationPage() {
     fetchQues()
   }, [questionId])
 
+  
   const handleRunCode = async () => {
     setIsCodeRunning(true) // disables 'run code' button for both users
-    setRunCodeResult('executing code.. please be patient!') // sets temporary run code result for both users
+    setRunCodeResult('executing code.. please be patient!') 
+    
+    const stdin = question.testInputs.join('\n')
+    const language = currentlySelectedLanguage.JDoodleName
+    const versionIndex = "0" // all the languages we support **should have** a versionIndex of 0
+    
+    const script = formatRawCode(rawCode, language) 
+
+    console.log(script)
 
     try {
       const run_code_response = await executeCodeInSandboxEnvironment(
-        rawCode, // script
-        "", // stdin
-        currentlySelectedLanguage.JDoodleName, // language: I have tested code for python, JS, java -> works
-        "0", // versionIndex: I (wishfully) assume all the languages we are supporting have a version of index 0
+        script,
+        stdin,
+        language,
+        versionIndex,
       )
 
       console.log('the result of executing code is: ', run_code_response.output)
@@ -120,7 +131,7 @@ export default function CollaborationPage() {
       const credits_spent_response = await getCreditsSpent()
       console.log('credits spent today is: ', credits_spent_response.data.used)
       console.log(`you have: ${20 - credits_spent_response.data.used} credits left for today`)
-
+ 
     } catch (error: any) {
       setRunCodeResult(`Error: ${error.response ? error.response.data.error : error.message}`);
     } finally {
@@ -132,6 +143,15 @@ export default function CollaborationPage() {
   const endSession = async () => {
     try {
       await removeUserFromCollabStore(auth.id)
+      console.log("test")
+      console.log(questionId)
+      await updateUserAttemptHistory(
+        auth.id,
+        questionId!, 
+        question.title, 
+        rawCode, 
+        currentlySelectedLanguage.name, 
+      );
       navigate("/matching/start")
     } catch (error) {
       console.error(error)
@@ -174,9 +194,14 @@ export default function CollaborationPage() {
         <LayoutManager
           codeEditingArea={<CodeEditingArea roomId={roomId}/>}
           questionArea={<QuestionArea questionId={questionId || "72"}/>}
+          otherButtons={
+            <div className="flex gap-2">   
+              <Button variant="destructive" className="btnred text-white" onClick={endSession}>End session</Button>
+              <Button variant="outline" onClick={handleRunCode} disabled={isCodeRunning}>Run code</Button>
+            </div>
+          }
         />
-        <Button variant="destructive" className="btnred mt-16 ml-auto text-white" onClick={endSession}>End session</Button>
-        <Button variant="outline" className="ml-6" onClick={handleRunCode} disabled={isCodeRunning}>Run code</Button>
+        <ChattingOverlay roomId={roomId} otherUserName={matchedUser.username} questionId={questionId} />
       </MainContainer>
     </>
   )

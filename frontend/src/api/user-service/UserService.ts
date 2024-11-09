@@ -11,6 +11,7 @@ const RESET_PASSWORD_API = "/reset-password";
 const UPDATE_ACCOUNT_API = "/update";
 const DELETE_ACCOUNT_API = "/";
 const UPDATE_PRIVILEGE_API = "/privilege";
+const ATTEMPT_HISTORY_API = '/history'
 
 const api = axios.create({
   baseURL: USER_SERVICE_URL,
@@ -45,7 +46,6 @@ async function sendLoginRequest(email : string, password : string, captcha : str
     return {status: error.status, message: error.response.data.message, userInfo: null};
   })
 }
-
 
 /**
  * An async function for sending a forgot password request to the backend.
@@ -199,5 +199,78 @@ async function updateUserPrivilege(id : string, isAdmin : boolean) {
   }
 }
 
+async function getUserAttempts(id: string) {
+  try {
+    const response = await api.get(USERS_BASE_URL + ATTEMPT_HISTORY_API + '/' + id);
+    return {
+      status: response.status,
+      message: response.data.message,
+      data: response.data.data, // Include the attempt history data
+    };
+  } catch (error: any) {
+    console.log("Error when fetching user attempt histories");
+    return {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || "Unknown error",
+      data: null,
+    };
+  }
+}
 
-export { sendLoginRequest, sendForgotPasswordRequest, sendSignupRequest, sendLogoutRequest, getUsers, getUserById, getUserFromToken, resetPassword, updateAccount, deleteAccount, updateUserPrivilege };
+/**
+ * Updates a specific user's attempt history for a given question with the provided attempt details.
+ * 
+ * This asynchronous function sends a PATCH request to update the user's attempt history, including
+ * the question ID, the user's raw code submission, the programming language used, the runtime of the
+ * executed code, and the memory usage. This information is recorded to keep track of the user's 
+ * attempts and their respective details.
+ *
+ * @async
+ * @function
+ * @param {string} userId - The unique identifier for the user whose attempt history is being updated.
+ * @param {string} questionId - The unique identifier of the question attempted by the user.
+ * @param {string} rawCode - The raw source code submitted by the user for the question.
+ * @param {string} language - The programming language in which the code is written.
+ * @param {string} runTime - The time taken to execute the code, represented as a string (in seconds).
+ * @param {string} memoryUsage - The memory used during code execution, represented as a string (in KB).
+ * 
+ * @returns {Promise<{status: number, message: string}>} - A promise that resolves to an object containing
+ *          the HTTP status code and a message indicating the result of the update operation.
+ *          - `status`: HTTP status code returned from the API (e.g., 200 for success).
+ *          - `message`: Message from the API response, indicating success or failure details.
+ * 
+ * @throws {Error} Logs an error message to the console if the request fails and returns an object with
+ *                 the error response status and message.
+ */
+async function updateUserAttemptHistory(userId: string, questionId: string, questionTitle: string, rawCode: string, language: string) {
+  try {
+    const requestBody = {
+      questionId,
+      questionTitle,
+      rawCode,
+      language,
+    }
+
+    const response = await api.patch(USERS_BASE_URL + ATTEMPT_HISTORY_API + '/' + userId, requestBody);
+    return { status: response.status, message: response.data.message };
+  } catch (error: any) {
+    console.error(`Error when updating account ID ${userId}\n`, error);
+    return { status: error.response.status, message: error.response.data.message };
+  }
+}
+
+export { 
+  sendLoginRequest, 
+  sendForgotPasswordRequest, 
+  sendSignupRequest, 
+  sendLogoutRequest, 
+  getUsers, 
+  getUserById, 
+  getUserFromToken, 
+  resetPassword, 
+  updateAccount, 
+  deleteAccount, 
+  updateUserPrivilege, 
+  getUserAttempts,
+  updateUserAttemptHistory
+};

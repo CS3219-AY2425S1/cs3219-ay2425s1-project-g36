@@ -59,6 +59,23 @@ async function isUserInCollabStore(userId: string) {
   })
 }
 
+// Update user's progLang whenever the language changes
+async function updateUserProgLang(userId: string, progLang: string) {
+  const requestBody = { progLang }
+
+  return await api.put(COLLABORATION_BASE_URL + `/${userId}`, requestBody).then(response => {
+    return {
+      status: response.status,
+      message: response.data.message,
+    }
+  }).catch(error => {
+    return {
+      status: error.status,
+      message: error.response.data.message,
+    }
+  })
+}
+
 // Sends API request to JDoodle to execute code in a sandboxed environment
 async function executeCodeInSandboxEnvironment(script: string, stdin: string, language: string, versionIndex: string) {
   const requestBody = {
@@ -109,4 +126,4 @@ async function getCreditsSpent() {
   }
 }
 
-export { getCollabInfo, removeUserFromCollabStore, isUserInCollabStore, executeCodeInSandboxEnvironment, getCreditsSpent }
+export { getCollabInfo, removeUserFromCollabStore, isUserInCollabStore, updateUserProgLang, executeCodeInSandboxEnvironment, getCreditsSpent }
