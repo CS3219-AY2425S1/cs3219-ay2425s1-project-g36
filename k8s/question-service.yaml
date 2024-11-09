@@ -14,3 +14,4 @@ spec:
       targetPort: 3000
   selector:
     io.kompose.service: question
+  type: LoadBalancer
