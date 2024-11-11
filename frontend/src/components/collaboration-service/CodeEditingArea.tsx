@@ -49,7 +49,10 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
 
   const { socket } = socketState;
   const { matchedUser } = matchedUserState 
+  
   const isLanguageChangeFromServer = useRef(false);
+  const prevLanguageRef = useRef(currentlySelectedLanguage);
+
   const { toast } = useToast();
   const { auth } = useAuth()
 
@@ -242,7 +245,12 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
       }
     };
   
-    handleLanguageChange();
+    // Only call handleLanguageChange if the language has genuinely changed
+    if (prevLanguageRef.current !== currentlySelectedLanguage) {
+      handleLanguageChange();
+      prevLanguageRef.current = currentlySelectedLanguage;
+    }
+
   }, [currentlySelectedLanguage]);
   
   // whenever socket receives the updated programming language, update currentlySelectedLanguage
