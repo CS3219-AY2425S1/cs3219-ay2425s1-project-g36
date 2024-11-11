@@ -62,30 +62,34 @@ io.on("connection", socket => {
             socket.join(documentId)
             console.log(documentId, "joined");
 
-            socket.emit('load-document', document.data) // tells frontend to update its contents
+            socket.emit('load-document', document.data) // tells frontend to update its Ace Editor
 
             socket.on('send-changes', (delta: object) => {
-                // when server receives changes from client, server will emit changes to the document
+                // server receives code changes from client, emit changes to the document
                 socket.broadcast.to(documentId).emit("receive-changes", delta)
             })
 
             socket.on('save-document', async data => {
-                // need to update database every 2 seconds
+                // update database every 2 seconds
                 await DocumentModel.findByIdAndUpdate(documentId, { data })
             })
 
             socket.on('run-code', (runCodeResult: string, isCodeRunning: boolean) => {
-                // when server receives the new runCodeResult, broadcast to the document the result
+                // server receives 'runCodeResult' and 'isCodeRunning', broadcast to the document
                 socket.broadcast.to(documentId).emit('run-code-result', runCodeResult, isCodeRunning)
             })
 
             socket.on('change-prog-language', (progLanguage: ProgrammingLanguage) => {
-                // when server receives the new programming language, broadcast to the document the new language
+                // when server receives the new programming language, broadcast to the document
                 socket.broadcast.to(documentId).emit('update-prog-language', progLanguage)
             })
 
             socket.on('update-isCodeRunning', (isCodeRunning: boolean) => {
                 socket.broadcast.to(documentId).emit('update-isCodeRunning', isCodeRunning)
+            })
+
+            socket.on('update-userRanCode', (userRanCode: boolean) => {
+                socket.broadcast.to(documentId).emit('update-userRanCode', userRanCode)
             })
         }
     });

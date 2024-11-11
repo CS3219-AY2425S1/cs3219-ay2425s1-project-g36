@@ -23,6 +23,8 @@ type CodeEditingAreaStateType = {
   setRunCodeResult: React.Dispatch<React.SetStateAction<string>>
   isCodeRunning: boolean,
   setIsCodeRunning: React.Dispatch<React.SetStateAction<boolean>>,
+  userRanCode: boolean,
+  setUserRanCode: React.Dispatch<React.SetStateAction<boolean>>, 
 }
 
 type QuestionAreaStateType = {
@@ -60,7 +62,8 @@ const CollaborationContextProvider = ({children} : {children: ReactNode}) => {
   const [isCodeRunning, setIsCodeRunning] = useState(false)
   const [editorSettings, setEditorSettings] = useState<CodeEditorSettings>(DEFAULT_CODE_EDITOR_SETTINGS);
   const [editorSettingValueBuffer, setEditorSettingValueBuffer] = useState<{[key:string] : string}>({}); // The buffer for holding the settings value that user just input into the settings panel. The values in this buffer are unparsed, so it may include invalid values. Only valid values will be assigned into the actual editor settings.
-  
+  const [userRanCode, setUserRanCode] = useState<boolean>(false) // true if user clicks 'run code'. This boolean is used to differentiate between clicking 'run code' and 'submit code'
+
   const codeEditingAreaState: CodeEditingAreaStateType =
   {
     displayLanguageSelectionPanel, setDisplayLanguageSelectionPanel,
@@ -70,7 +73,8 @@ const CollaborationContextProvider = ({children} : {children: ReactNode}) => {
     editorSettings, setEditorSettings,
     editorSettingValueBuffer, setEditorSettingValueBuffer,
     runCodeResult, setRunCodeResult,
-    isCodeRunning, setIsCodeRunning
+    isCodeRunning, setIsCodeRunning,
+    userRanCode, setUserRanCode,
   }
 
   const [question, setQuestion] = useState<Question>(PLACEHOLDER_LOADING_QUESTION);

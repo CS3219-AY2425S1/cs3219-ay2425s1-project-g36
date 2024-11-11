@@ -20,7 +20,7 @@ const PLACEHOLDER_ERROR_QUESTION: Question = {
 export default function TestCaseResults() {
     const { questionAreaState, codeEditingAreaState } = useCollaborationContext();
     const { question, setQuestion } = questionAreaState;
-    const { runCodeResult, isCodeRunning } = codeEditingAreaState;
+    const { runCodeResult, isCodeRunning, userRanCode } = codeEditingAreaState;
 
     const [resultArray, setResultArray] = useState<string[]>([DEFAULT_RESULT])
 
@@ -57,14 +57,15 @@ export default function TestCaseResults() {
         return null;
     }
 
-    // User has not run code
-    if (resultArray[0] === DEFAULT_RESULT) {
+    // 1. User clicked 'run code' or
+    // 2. User has not ran code 
+    if (userRanCode || resultArray[0] === DEFAULT_RESULT) {
         return (
             <div className="border rounded-lg overflow-hidden">
                 <div className="bg-gray-100 p-4">
                     <div className="text-lg font-semibold mb-2">Test Case Results:</div>
                     <div className="space-y-2">
-                        User has not executed code
+                        User has not submitted code
                     </div>
                 </div>
             </div>
@@ -88,7 +89,7 @@ export default function TestCaseResults() {
         );
     }
 
-    // Happy path begins here
+    // Happy path begins here (where user clicked 'submit code')
     let noOfTestCasesPassed = 0
     resultArray.forEach((result, index) => {
         if (resultArray[index] === testOutputs[index]) {
