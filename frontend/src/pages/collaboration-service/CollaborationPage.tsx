@@ -158,8 +158,8 @@ export default function CollaborationPage() {
     }
   }
 
-  if (isUserLoading || isQuestionLoading) return null
-
+  if (isUserLoading || isQuestionLoading) return <div>loading</div>
+``
   if (roomId == null || matchedUser == null || question == null) {
     console.log('if you see this message, means either roomId, matchedUser, or question is null, hence CollabPage cannot load')
     console.log(`roomId: ${roomId}`)
