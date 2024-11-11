@@ -39,7 +39,7 @@ export default function AttemptedHistoryPage() {
         const result = await getUserAttempts(auth.id);
         
         if (result.status === 200) {
-          setAttemptedQuestions(result.data);
+          setAttemptedQuestions(result.data.sort((a: Attempt, b: Attempt) => new Date(b.timeSubmitted).getTime() - new Date(a.timeSubmitted).getTime()));
           setError("");
           setTotalPages(Math.ceil(result.data.length / itemsPerPage));
         } else {
