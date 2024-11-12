@@ -1,16 +1,18 @@
+// External libraries
 import { Router } from 'express';
 
+// Internal project modules
 import { 
     createUser, 
+    deleteUser, 
     getAllUsers, 
     getUser, 
+    getUserAttempts, 
     updateUser, 
-    deleteUser, 
-    updateUserPrivilege,
-    getUserAttempts,
-    updateUserQuestionAttempt
+    updateUserPrivilege, 
+    updateUserQuestionAttempt 
 } from '../controllers/userController';
-import { protectRoute, adminProtectRoute } from '../middlewares/protectRoute';
+import { adminProtectRoute, protectRoute } from '../middlewares/protectRoute';
 
 const router: Router = Router();
 

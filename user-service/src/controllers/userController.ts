@@ -1,7 +1,9 @@
+// External libraries
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import mongoose, { isValidObjectId } from "mongoose";
 
+// Internal project modules
 import AttemptHistory from "../models/attemptHistoryModel";
 import generateTokenAndSetCookie from '../lib/generateToken';
 import User from '../models/userModel';
