@@ -165,7 +165,7 @@ io.on("connection", socket => {
                 }
 
                 // when server receives a chat message from client, server will broadcast the chat message
-                socket.broadcast.to(roomId).emit("receive-chat-message-user", chatMessage)
+                socket.broadcast.to(roomId + "-messages").emit("receive-chat-message-user", chatMessage)
             })
 
             // websocket handler to clear chat
