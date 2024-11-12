@@ -19,7 +19,6 @@ export default function LoginPage() {
           </div>
         </UserServiceCommonContainer>  
       </MainContainer>
-      <p>[Development information, remove in production] Since currently the backend doesn't implement user role in its responses, for now, you can use "Admin" as username to log into administrator mode (to let the frontend recognize you as an administrator).</p>
     </>
   );
 }
