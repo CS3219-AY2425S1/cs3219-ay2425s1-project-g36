@@ -108,7 +108,11 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
 
     // Clears the chat messages at frontend (inside the chatting panel)
     const clearChatMessages = () => {
-      if (window.confirm("Are you sure you want to clear all chat messages?")) {
+
+      const CLEAR_BOT_MSG = "Are you sure you want to clear all chat messages with the bot?";
+      const CLEAR_USER_MSG = "Are you sure you want to clear all chat messages with your collaboration partner? Your partner will be notified.";
+
+      if (window.confirm(isBot ? CLEAR_BOT_MSG : CLEAR_USER_MSG)) {
         // clear chat in frontend
         setChatMessages([]);
 
@@ -146,13 +150,27 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
               // Use a very short delay to give time for the browser to automatically recalculate the container's dimensions
               window.setTimeout(calculateShouldDisplayGoToBottomButton, 10); 
           })
+
+          // if received message from other user to clear chat, do so
+          socket.once("received-clear-chat-user", () => {
+
+            // clear chat in frontend
+            setChatMessages([]);
+
+            toast({
+              description: "Your collaboration partner has requested to clear their chat log with you. Your chat log has been cleared."
+            });
+              
+            // Use a very short delay to give time for the browser to automatically recalculate the container's dimensions
+            window.setTimeout(calculateShouldDisplayGoToBottomButton, 10); 
+          });
         } else {
             socket.once("receive-chat-message-bot", (chatMessage : string) => {
                 addChatMessage({message: chatMessage, isSelf: false});
                 
                 // Use a very short delay to give time for the browser to automatically recalculate the container's dimensions
                 window.setTimeout(calculateShouldDisplayGoToBottomButton, 10); 
-            })
+            });
         }
     })
 
