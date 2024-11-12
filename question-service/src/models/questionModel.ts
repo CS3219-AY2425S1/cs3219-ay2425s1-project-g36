@@ -1,8 +1,15 @@
+// External libraries
 import mongoose, { Document } from "mongoose";
-import QUESTION_TOPICS from "./questionTopics";
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 
+// Internal project modules
+import QUESTION_TOPICS from "./questionTopics";
 
+/**
+ * Interface for the Question model, extending Mongoose's Document.
+ * 
+ * This interface defines the structure of a Question document in the MongoDB collection.
+ */
 interface IQuestion extends Document {
     title: string;
     difficulty: "easy" | "medium" | "hard";
@@ -12,8 +19,15 @@ interface IQuestion extends Document {
     testOutputs: string[];
 }
 
+// Type alias for topics, constrained to valid values in QUESTION_TOPICS array
 type Topic = typeof QUESTION_TOPICS[number]
 
+/**
+ * Mongoose schema for the Question model.
+ * 
+ * This schema defines the structure, data types, default values, and validation 
+ * for each field in a Question document. An auto-incrementing `_id` is added to each document.
+ */
 const questionSchema = new mongoose.Schema(
     {
         _id: {
@@ -56,5 +70,12 @@ const questionSchema = new mongoose.Schema(
     }
 );
 
+// Add auto-increment plugin to handle sequential `_id` generation
 questionSchema.plugin(AutoIncrement);
+
+/**
+ * Question Model
+ * 
+ * This model provides an interface to interact with the `Question` collection in MongoDB.
+ */
 export const Question = mongoose.model<IQuestion>("Question", questionSchema);
