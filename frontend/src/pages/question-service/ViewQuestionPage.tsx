@@ -27,6 +27,8 @@ interface CodeDisplay {
 export default function ViewQuestionPage({ hasCode = false } : ViewQuestionPageProps) {
   const params = useParams();
   const id = params.id as string;
+  console.log("params: ", params)
+  const timeSubmitted = new Date(params.timeSubmitted!);
   const { auth } = useAuth();
 
   const [question, setQuestion] = useState<Question | null>(null);
@@ -54,10 +56,15 @@ export default function ViewQuestionPage({ hasCode = false } : ViewQuestionPageP
       try {
         const result = await getUserAttempts(auth.id);
         console.log(result.data)
+        console.log(timeSubmitted)
         if (result.status === 200) {
           // Filter the attempts for the specific questionId
           const matchedAttempts = result.data
-            .filter((attempt: Attempt) => attempt.questionId === parseQuestionId(id))
+            .filter((attempt: Attempt) => {
+              console.log("time submitted;", attempt.timeSubmitted)
+              return (attempt.questionId === parseQuestionId(id)) && new Date(attempt.timeSubmitted).getTime() == new Date(timeSubmitted).getTime()
+              
+              })
             .sort((a: Attempt, b: Attempt) => new Date(b.timeSubmitted).getTime() - new Date(a.timeSubmitted).getTime());
 
           // Select the latest attempt (first one in sorted array)

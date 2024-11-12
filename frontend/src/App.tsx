@@ -153,7 +153,7 @@ function App() {
               nonAdminRoute={ <Navigate to="/questions" /> }
             />
           } />
-          <Route path="/attempts/:id" element={
+          <Route path="/attempts/:id/:timeSubmitted" element={
             <PrivateRoute>
               <ViewQuestionPage hasCode={true}/>
             </PrivateRoute>
