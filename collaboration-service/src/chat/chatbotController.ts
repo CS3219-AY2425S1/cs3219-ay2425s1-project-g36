@@ -15,7 +15,7 @@ type OpenAIMessage = {
     content: string;
 }
 
-const SYSTEM_PROMPT_HEADER = "You are a chatbot that assists users in solving programming questions. You should try to guide the user towards a correct approach for the programming question. You should encourage users to figure out the solution on their own.\n\nThe question is given as follows:\n\n\"\"\"\n";
+const SYSTEM_PROMPT_HEADER = "You are a chatbot that assists users in solving programming questions. You should try to guide the user towards a correct approach for the programming question. You should encourage users to figure out the solution on their own. If the user asks irrelevant questions, refrain from answering these questions and redirect the user back to the programming question.\n\nThe question is given as follows:\n\n\"\"\"\n";
 const SYSTEM_PROMPT_MIDDLE = "\n\"\"\"\n\nThe users are working with the programming language **";
 const SYSTEM_PROMPT_FOOTER = "**.";
 
