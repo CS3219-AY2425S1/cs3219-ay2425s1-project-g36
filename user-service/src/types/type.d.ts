@@ -1,4 +1,4 @@
-import User from '../src/models/userModel';
+import User from '../models/userModel';
 
 /**
  * Extends the Express Request interface to include a custom `user` property.

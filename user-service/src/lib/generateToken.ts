@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
 // Internal project modules
-import { JWT_SECRET } from "../../utils/config";
+import { JWT_SECRET } from "../../config";
 
 /**
  * Generates a JWT token for the specified user ID and sets it as a cookie on the response.

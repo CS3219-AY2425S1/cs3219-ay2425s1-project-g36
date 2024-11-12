@@ -4,8 +4,8 @@ import cookieParser from 'cookie-parser';
 import express, { Application, Request, Response } from 'express';
 
 // Internal project modules
-import connectMongoDB from './db/connectDB';
-import { PORT } from './utils/config';
+import connectMongoDB from './src/db/connectDB';
+import { PORT } from './config';
 import authenticationRoute from './src/routes/authenticationRoute';
 import userRoute from './src/routes/userRoute';
 

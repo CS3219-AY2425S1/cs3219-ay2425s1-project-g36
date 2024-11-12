@@ -9,7 +9,7 @@ import nodemailer from 'nodemailer';
 import { Blacklist } from '../models/blacklistModel';
 import generateTokenAndSetCookie from '../lib/generateToken';
 import User from '../models/userModel';
-import { EMAIL, PASSWORD, JWT_SECRET } from '../../utils/config';
+import { EMAIL, PASSWORD, JWT_SECRET } from '../../config';
 
 const MAX_FAILED_ATTEMPTS = 5; 
 const CAPTCHA_REQUIRED_ATTEMPTS = 3; 

@@ -2,7 +2,7 @@
 import mongoose, { Mongoose } from "mongoose";
 
 // Internal project modules
-import { USER_SERVICE_MONGO_URI } from '../utils/config';
+import { USER_SERVICE_MONGO_URI } from '../../config';
 
 /**
  * Connects to MongoDB using the provided connection URI.

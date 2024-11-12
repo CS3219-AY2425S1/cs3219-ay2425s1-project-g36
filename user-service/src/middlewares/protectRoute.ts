@@ -4,7 +4,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import mongoose from "mongoose";
 
 // Internal project modules
-import { JWT_SECRET } from "../../utils/config";
+import { JWT_SECRET } from "../../config";
 import User from "../models/userModel";
 
 // Define custom JwtPayload type
