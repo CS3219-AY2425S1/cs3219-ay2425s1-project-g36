@@ -1,10 +1,11 @@
-import express, { Application, Request, Response } from 'express';
+// External libraries
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import express, { Application, Request, Response } from 'express';
 
+// Internal project modules
 import connectMongoDB from './db/connectDB';
 import { PORT } from './utils/config';
-
 import authenticationRoute from './src/routes/authenticationRoute';
 import userRoute from './src/routes/userRoute';
 
