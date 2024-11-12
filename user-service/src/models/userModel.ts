@@ -1,5 +1,6 @@
 import mongoose, { Document } from "mongoose"
-import AttemptHistory, { attemptHistorySchema, IAttemptHistory } from "./attemptHistoryModel";
+
+import { attemptHistorySchema, IAttemptHistory } from "./attemptHistoryModel";
 
 /**
  * Interface for the User model, extending Mongoose's Document.
