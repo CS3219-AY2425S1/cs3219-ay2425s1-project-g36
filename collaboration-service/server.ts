@@ -170,12 +170,15 @@ io.on("connection", socket => {
                 }
 
                 // when server receives a chat message from client, server will broadcast the chat message
-                socket.broadcast.to(roomId).emit("receive-chat-message-user", chatMessage)
+                socket.broadcast.to(roomId + "-messages").emit("receive-chat-message-user", chatMessage)
             })
 
             // websocket handler to clear chat
             socket.on('clear-chat-user', async () => {
                 await ChatModel.findByIdAndUpdate(userChat._id, { messages: [] });
+
+                // inform other user to clear their messages in frontend (and produce toast message)
+                socket.broadcast.to(roomId + "-messages").emit("received-clear-chat-user");
             });
         }
     });
