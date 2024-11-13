@@ -2,7 +2,6 @@ import CustomMarkdown from "@/components/common/CustomMarkdown";
 import { formatTimestampToTimeString } from "@/lib/utils";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
-import Markdown from 'react-markdown';
 import { Link } from "react-router-dom";
 
 /**

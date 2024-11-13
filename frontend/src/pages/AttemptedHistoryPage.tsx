@@ -18,8 +18,8 @@ export interface Attempt {
   code: string;
 }
 
-const DEFAULT_ITEMS_PER_PAGE = 5;
-const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20];
+const DEFAULT_ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50];
 
 export default function AttemptedHistoryPage() {
   const [attemptedQuestions, setAttemptedQuestions] = useState<Attempt[]>([]);
@@ -39,7 +39,7 @@ export default function AttemptedHistoryPage() {
         const result = await getUserAttempts(auth.id);
         
         if (result.status === 200) {
-          setAttemptedQuestions(result.data);
+          setAttemptedQuestions(result.data.sort((a: Attempt, b: Attempt) => new Date(b.timeSubmitted).getTime() - new Date(a.timeSubmitted).getTime()));
           setError("");
           setTotalPages(Math.ceil(result.data.length / itemsPerPage));
         } else {
@@ -88,7 +88,7 @@ export default function AttemptedHistoryPage() {
               <TableHeader className="bg-black-100">
                 <TableRow>
                   <TableHead>Question ID</TableHead>
-                  <TableHead>Time Submitted</TableHead>
+                  <TableHead>Time since attempt</TableHead>
                   <TableHead>Question</TableHead>
                   <TableHead>Language</TableHead>
                 </TableRow>
@@ -105,7 +105,7 @@ export default function AttemptedHistoryPage() {
                       </TableCell>
                       <TableCell className="px-4 py-1">
                         <Link
-                          to={`/attempts/${question.questionId}`}
+                          to={`/attempts/${question.questionId}/${question.timeSubmitted}`}
                           className="text-blue-500 hover:text-blue-700 hover:underline"
                         >
                           {question.questionTitle}
