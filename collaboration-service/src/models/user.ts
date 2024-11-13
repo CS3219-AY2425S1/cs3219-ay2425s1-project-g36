@@ -1,3 +1,6 @@
+/**
+ * Interface representing a User participating in a collaboration session.
+ */
 interface User {
     userId : string;
     matchedUserId: string,
