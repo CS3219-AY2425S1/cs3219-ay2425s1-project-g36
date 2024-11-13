@@ -5,6 +5,10 @@ type AceEditorTheme = {
 
 const AceEditorThemes : AceEditorTheme[] = [
     {
+        displayName: "Cloud9 Night",
+        internalName: "cloud9_night",
+    },
+    {
         displayName: "GitHub",
         internalName: "github",
     },
@@ -13,13 +17,13 @@ const AceEditorThemes : AceEditorTheme[] = [
         internalName: "github_dark",
     },
     {
+        displayName: "Terminal",
+        internalName: "terminal",
+    },
+    {
         displayName: "Twilight",
         internalName: "twilight",
     },
-    {
-        displayName: "Terminal",
-        internalName: "terminal",
-    }
 ];
 
 export { AceEditorThemes };

@@ -25,6 +25,7 @@ import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/mode-typescript";
 
 // Ace Editor Themes
+import "ace-builds/src-noconflict/theme-cloud9_night"
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/theme-github_dark";
 import "ace-builds/src-noconflict/theme-twilight";
@@ -43,12 +44,16 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
     editorSettings, setEditorSettings,
     editorSettingValueBuffer, setEditorSettingValueBuffer,
     runCodeResult, setRunCodeResult,
-    isCodeRunning, setIsCodeRunning
+    isCodeRunning, setIsCodeRunning,
+    userRanCode, setUserRanCode
   } = codeEditingAreaState;
 
   const { socket } = socketState;
   const { matchedUser } = matchedUserState 
+  
   const isLanguageChangeFromServer = useRef(false);
+  const prevLanguageRef = useRef(currentlySelectedLanguage);
+
   const { toast } = useToast();
   const { auth } = useAuth()
 
@@ -176,7 +181,7 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
 
   }, [socket])
   
-  // whenever 'isCodeRunning' state changes, send this new state to the other user
+  // send 'isCodeRunning' to server
   useEffect(() => {
     if (socket === null) return
     
@@ -184,7 +189,7 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
     
   }, [isCodeRunning])
   
-  // whenever socket receives the updated 'isCodeRunning', update it
+  // receive 'isCodeRunning' from server, update state
   useEffect(() => {
     if (socket === null) return
     const handler = (isCodeRunning: boolean) => {
@@ -194,6 +199,28 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
     socket.on('update-isCodeRunning', handler)
     return () => {
       socket.off('update-isCodeRunning', handler)
+    }
+
+  }, [socket])
+
+  // send 'userRanCode' to server
+  useEffect(() => {
+    if (socket === null) return
+    
+    socket.emit('update-userRanCode', userRanCode)
+    
+  }, [userRanCode])
+  
+  // receive 'userRanCode' from server, update state
+  useEffect(() => {
+    if (socket === null) return
+    const handler = (userRanCode: boolean) => {
+      setUserRanCode(userRanCode)
+    }
+
+    socket.on('update-userRanCode', handler)
+    return () => {
+      socket.off('update-userRanCode', handler)
     }
 
   }, [socket])
@@ -219,7 +246,12 @@ export default function CodeEditingArea({ roomId }: { roomId: string }) {
       }
     };
   
-    handleLanguageChange();
+    // Only call handleLanguageChange if the language has genuinely changed
+    if (prevLanguageRef.current !== currentlySelectedLanguage) {
+      handleLanguageChange();
+      prevLanguageRef.current = currentlySelectedLanguage;
+    }
+
   }, [currentlySelectedLanguage]);
   
   // whenever socket receives the updated programming language, update currentlySelectedLanguage

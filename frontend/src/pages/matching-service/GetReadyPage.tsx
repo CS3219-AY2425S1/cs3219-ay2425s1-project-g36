@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { isUserInCollabStore } from "@/api/collaboration-service/CollaborationService";
 
 const MAXIMUM_CONFIRMATION_DURATION = 10; // in seconds
-const CHECK_CONFIRMATION_STATE_INTERVAL = 500; // in milliseconds
-const MAXIMUM_CHECK_CONFIRMATION_STATE_NETWORK_ERROR_COUNT = 20;
+const CHECK_CONFIRMATION_STATE_INTERVAL = 1000; // in milliseconds
+const MAXIMUM_CHECK_CONFIRMATION_STATE_NETWORK_ERROR_COUNT = 10;
 
 export default function GetReadyPage() {
   const pathname = location.pathname;
@@ -99,7 +100,7 @@ export default function GetReadyPage() {
    * If the user is still waiting for the other user, do nothing.
    * For other http statuses, navigate to the failed matching page with its respective message.
    */
-  const checkConfirmationState = () => {
+  const checkConfirmationState = async () => {
     console.log("checking confirmation state");
 
     // If the user navigates away from the page manually, clear the intervals.
@@ -109,36 +110,41 @@ export default function GetReadyPage() {
       console.log("matching cancelled due to leaving page");
       return;
     }
+
     // Send the request to the backend to check the confirmation state.
-    sendCheckConfirmationStateRequest(auth.id).then(
-      response => {
-        if(response.status === HTTP_OK) {
+    try {
+      const response = await sendCheckConfirmationStateRequest(auth.id)
+      if (response.status === HTTP_OK) {
+        const second_response = await isUserInCollabStore(auth.id)
+        
+        if (second_response.status === 200) {
           // Both users have confirmed, navigate to the collaboration page.
-          console.log("confirmation received, starting collaboration");
           onNavigatingAway();
           navigate(`../collaboration`);
-
-        } else if (response.status === HTTP_WAITING) {
-          // Waiting for the other user to confirm, do nothing.
-          console.log("matching...");
-
-        } else if (response.message === "ERR_NETWORK") {
-          // Network error, retry the request.
-          checkConfirmationStateNetworkErrorCount.current++;
-          if(checkConfirmationStateNetworkErrorCount.current >= MAXIMUM_CHECK_CONFIRMATION_STATE_NETWORK_ERROR_COUNT) {
-            // TODO: backend required to handle this ?
-            onNavigatingAway();
-            console.log("confirmation cancelled due to network error");
-            navigate(`../matching/failed?message=Network error, please check your network and try again.&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
-          }
-        } else {
-          // Backend error, navigate to the failed matching page.
-          onNavigatingAway();
-          console.log("confirmation cancelled due to backend error");
-          navigate(`../matching/failed?message=${response.message}&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
         }
+
+      } else if (response.status === HTTP_WAITING) {
+        // Waiting for the other user to confirm, do nothing.
+        console.log("matching...");
+
+      } else if (response.message === "ERR_NETWORK") {
+        // Network error, retry the request.
+        checkConfirmationStateNetworkErrorCount.current++;
+        if(checkConfirmationStateNetworkErrorCount.current >= MAXIMUM_CHECK_CONFIRMATION_STATE_NETWORK_ERROR_COUNT) {
+          // TODO: backend required to handle this ?
+          onNavigatingAway();
+          console.log("confirmation cancelled due to network error");
+          navigate(`../matching/failed?message=Network error, please check your network and try again.&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
+        }
+      } else {
+        // Backend error, navigate to the failed matching page.
+        onNavigatingAway();
+        console.log("confirmation cancelled due to backend error");
+        navigate(`../matching/failed?message=${response.message}&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
       }
-    );
+    } catch (error) {
+      console.error(error)   
+    }
   }
 
   const updateEndConfirmationTimer = () => {

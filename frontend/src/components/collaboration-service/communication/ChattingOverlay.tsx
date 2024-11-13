@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export type ChatMessage = {
   message: string,
   isSelf: boolean,
+  timestamp: Date,
 }
 
 export type ServerSideChatMessage = {
@@ -52,7 +53,8 @@ export default function ChattingOverlay({roomId, otherUserName, questionId} : {r
       message => {
         return {
           message: message.content,
-          isSelf: message.sender === auth.id
+          isSelf: message.sender === auth.id,
+          timestamp: new Date(message.timestamp)
         }
       }
     );

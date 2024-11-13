@@ -62,30 +62,34 @@ io.on("connection", socket => {
             socket.join(documentId)
             console.log(documentId, "joined");
 
-            socket.emit('load-document', document.data) // tells frontend to update its contents
+            socket.emit('load-document', document.data) // tells frontend to update its Ace Editor
 
             socket.on('send-changes', (delta: object) => {
-                // when server receives changes from client, server will emit changes to the document
+                // server receives code changes from client, emit changes to the document
                 socket.broadcast.to(documentId).emit("receive-changes", delta)
             })
 
             socket.on('save-document', async data => {
-                // need to update database every 2 seconds
+                // update database every 2 seconds
                 await DocumentModel.findByIdAndUpdate(documentId, { data })
             })
 
             socket.on('run-code', (runCodeResult: string, isCodeRunning: boolean) => {
-                // when server receives the new runCodeResult, broadcast to the document the result
+                // server receives 'runCodeResult' and 'isCodeRunning', broadcast to the document
                 socket.broadcast.to(documentId).emit('run-code-result', runCodeResult, isCodeRunning)
             })
 
             socket.on('change-prog-language', (progLanguage: ProgrammingLanguage) => {
-                // when server receives the new programming language, broadcast to the document the new language
+                // when server receives the new programming language, broadcast to the document
                 socket.broadcast.to(documentId).emit('update-prog-language', progLanguage)
             })
 
             socket.on('update-isCodeRunning', (isCodeRunning: boolean) => {
                 socket.broadcast.to(documentId).emit('update-isCodeRunning', isCodeRunning)
+            })
+
+            socket.on('update-userRanCode', (userRanCode: boolean) => {
+                socket.broadcast.to(documentId).emit('update-userRanCode', userRanCode)
             })
         }
     });
@@ -111,6 +115,7 @@ io.on("connection", socket => {
             socket.on('send-chat-message-bot', async (
                 questionId : string,
                 progLang : string,
+                codeState : string,
                 chatMessage: {
                     message: string,
                     userId: string
@@ -134,7 +139,7 @@ io.on("connection", socket => {
 
                 // when server receives a chat message from client, the AI bot will come up with
                 // a response, then socket transmits the answer back
-                const aiResponse = await makeReplyToChat(questionId, progLang, botChat._id);
+                const aiResponse = await makeReplyToChat(questionId, progLang, codeState, botChat._id);
                 console.log(aiResponse);
                 socket.emit("receive-chat-message-bot", aiResponse);
             });
@@ -165,12 +170,15 @@ io.on("connection", socket => {
                 }
 
                 // when server receives a chat message from client, server will broadcast the chat message
-                socket.broadcast.to(roomId).emit("receive-chat-message-user", chatMessage)
+                socket.broadcast.to(roomId + "-messages").emit("receive-chat-message-user", chatMessage)
             })
 
             // websocket handler to clear chat
             socket.on('clear-chat-user', async () => {
                 await ChatModel.findByIdAndUpdate(userChat._id, { messages: [] });
+
+                // inform other user to clear their messages in frontend (and produce toast message)
+                socket.broadcast.to(roomId + "-messages").emit("received-clear-chat-user");
             });
         }
     });

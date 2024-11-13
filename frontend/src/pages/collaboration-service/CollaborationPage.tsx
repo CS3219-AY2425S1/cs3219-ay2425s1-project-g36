@@ -29,7 +29,7 @@ export default function CollaborationPage() {
 
   const { codeEditingAreaState, matchedUserState, questionAreaState } = useCollaborationContext();
   
-  const { rawCode, setRunCodeResult, currentlySelectedLanguage, setCurrentSelectedLanguage, isCodeRunning, setIsCodeRunning } = codeEditingAreaState;
+  const { rawCode, setRunCodeResult, currentlySelectedLanguage, setCurrentSelectedLanguage, isCodeRunning, setIsCodeRunning, setUserRanCode } = codeEditingAreaState;
   const { matchedUser, setMatchedUser } = matchedUserState
   const { question, setQuestion } = questionAreaState
 
@@ -105,9 +105,10 @@ export default function CollaborationPage() {
   }, [questionId])
 
   
-  const handleRunCode = async () => {
+  const handleSubmitCode = async () => {
     setIsCodeRunning(true) // disables 'run code' button for both users
     setRunCodeResult('executing code.. please be patient!') 
+    setUserRanCode(false)
     
     const stdin = question.testInputs.join('\n')
     const language = currentlySelectedLanguage.JDoodleName
@@ -139,12 +140,39 @@ export default function CollaborationPage() {
     }
   };
 
+  const handleRunCode = async () => {
+    setIsCodeRunning(true) // disables 'run code' button for both users
+    setRunCodeResult('executing code.. please be patient!') 
+    setUserRanCode(true)
+    
+    console.log(rawCode)
+
+    try {
+      const run_code_response = await executeCodeInSandboxEnvironment(
+        rawCode,
+        "",
+        currentlySelectedLanguage.JDoodleName,
+        "0",
+      )
+
+      console.log('the result of executing code is: ', run_code_response.output)
+      setRunCodeResult(run_code_response.output.output);
+
+      const credits_spent_response = await getCreditsSpent()
+      console.log('credits spent today is: ', credits_spent_response.data.used)
+      console.log(`you have: ${20 - credits_spent_response.data.used} credits left for today`)
+ 
+    } catch (error: any) {
+      setRunCodeResult(`Error: ${error.response ? error.response.data.error : error.message}`);
+    } finally {
+      setIsCodeRunning(false)
+    }
+  };
+
   // When user ends session, remove user from collabStore
   const endSession = async () => {
     try {
       await removeUserFromCollabStore(auth.id)
-      console.log("test")
-      console.log(questionId)
       await updateUserAttemptHistory(
         auth.id,
         questionId!, 
@@ -158,7 +186,7 @@ export default function CollaborationPage() {
     }
   }
 
-  if (isUserLoading || isQuestionLoading) return null
+  if (isUserLoading || isQuestionLoading) return <div>loading</div>
 
   if (roomId == null || matchedUser == null || question == null) {
     console.log('if you see this message, means either roomId, matchedUser, or question is null, hence CollabPage cannot load')
@@ -196,8 +224,9 @@ export default function CollaborationPage() {
           questionArea={<QuestionArea questionId={questionId || "72"}/>}
           otherButtons={
             <div className="flex gap-2">   
-              <Button variant="destructive" className="btnred text-white" onClick={endSession}>End session</Button>
               <Button variant="outline" onClick={handleRunCode} disabled={isCodeRunning}>Run code</Button>
+              <Button variant="green" onClick={handleSubmitCode} disabled={isCodeRunning}>Submit code</Button>
+              <Button variant="destructive" className="btnred text-white" onClick={endSession}>End session</Button>
             </div>
           }
         />
