@@ -1,6 +1,7 @@
 import { sendCancelMatchingRequest } from '@/api/matching-service/MatchingService';
 import { getUserById, sendLogoutRequest } from '@/api/user-service/UserService';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 // authentication state
 interface AuthState {
@@ -45,10 +46,21 @@ const saveAuthState = (auth: AuthState) => {
 
 export const AuthProvider = ({ children } : { children: React.ReactNode }) => {
   const [auth, setAuth] = useState<AuthState>(loadAuthState);
+  const { toast } = useToast();
+  const checkAuthResetCount = useRef(0);
+  const checkAuthHandler = useRef<NodeJS.Timeout | null>(null);
 
   const _logout = async () => {
     // no matter what, try to send a cancel matching request if required
     await sendCancelMatchingRequest(auth.id);
+
+    // ensure checkauth isnt called when logged out
+    if (checkAuthHandler.current) {
+      clearTimeout(checkAuthHandler.current);
+      checkAuthHandler.current = null;
+    }
+
+    checkAuthResetCount.current = 0;
 
     const newAuthState = DEFAULT_AUTH_STATE;
     setAuth(newAuthState);
@@ -58,22 +70,54 @@ export const AuthProvider = ({ children } : { children: React.ReactNode }) => {
   const checkAuth = async () => {
     try {
       const response = await getUserById(auth.id);
-      if (response.status !== 200) {
-        _logout();
+
+      console.log(auth.id, response, checkAuthResetCount.current)
+
+      if (response.status !== undefined && response.status !== null) {
+        // check for null status as well
+        if (response.status !== 200 || auth.id === "" || auth.id === undefined || auth.id === null || checkAuthResetCount.current >= 5) {
+          _logout();
+          toast({
+            description: "Logged out due to expired token or other network issues. Log in again",
+            duration: 2500
+          });
+        } else {
+          checkAuthResetCount.current = 0;
+
+          const newAuthState = { 
+            isLoggedIn: true,
+            isAdmin: response.data.isAdmin,
+            id: auth.id,
+            token: response.data.token,
+            username: response.data.username,
+            email: response.data.email
+          };
+          setAuth(newAuthState);
+          saveAuthState(newAuthState);
+        }
       } else {
-        const newAuthState = { 
-          isLoggedIn: true,
-          isAdmin: response.data.isAdmin,
-          id: auth.id,
-          token: response.data.token,
-          username: response.data.username,
-          email: response.data.email
-        };
-        setAuth(newAuthState);
-        saveAuthState(newAuthState);
+        // network error has occurred
+        // don't do anything, in case subsequent call work0s
+        if (checkAuthResetCount.current < 5) {
+          const newAuthState = {...auth};
+          setAuth(newAuthState);
+          saveAuthState(newAuthState);
+          checkAuthResetCount.current++;
+        } else {
+          _logout();
+        }
       }
     } catch (err : any) {
-      _logout();
+      // network error has occurred
+      // don't do anything, in case subsequent call work0s
+      if (checkAuthResetCount.current < 5) {
+        const newAuthState = {...auth};
+        setAuth(newAuthState);
+        saveAuthState(newAuthState);
+        checkAuthResetCount.current++;
+      } else {
+        _logout();
+      }
     }
   }
 
@@ -105,15 +149,20 @@ export const AuthProvider = ({ children } : { children: React.ReactNode }) => {
 
   // Effect to check and sync auth state changes to localStorage
   useEffect(() => {
+    saveAuthState(auth);
+
+    // if logged out don't even bother checking...
+    if (auth.isLoggedIn === false) return;
+
     // Set up a timer to run checkAuth after a 1000ms delay
-    const handler = setTimeout(() => {
+    checkAuthHandler.current = setTimeout(() => {
       checkAuth();
     }, 1000);
 
-    saveAuthState(auth);
-
     // Clear the timeout if auth changes again before the delay ends
-    return () => clearTimeout(handler);
+    return () => {
+      if (checkAuthHandler.current) clearTimeout(checkAuthHandler.current)
+    };
   }, [auth]);
 
   // update auth state across browser tabs

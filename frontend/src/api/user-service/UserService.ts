@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 const USER_SERVICE_URL = "http://localhost:4000";
 const USERS_BASE_URL = "/users";
@@ -17,6 +17,20 @@ const api = axios.create({
   baseURL: USER_SERVICE_URL,
   withCredentials: true
 });
+
+// Add a request interceptor to simulate network errors
+// play around with the X value to inflict absolute havoc
+// api.interceptors.request.use(
+//   (config) => {
+//     const X = 0;
+//     // Simulate a random network failure with a X% probability
+//     if (Math.random() < X/100) {
+//       return Promise.reject(new AxiosError('Simulated network error', '500'));
+//     }
+//     return config;
+//   },
+//   (error) => Promise.reject(new AxiosError(error.message, '500'))
+// );
 
 /**
  * An async function for sending a login request to the backend.
@@ -107,7 +121,7 @@ async function getUserById(id: string) {
     return {status: response.status, message: response.data.message, data: response.data.data};
   } catch (error : any) {
     console.error("Error retrieving user" , error);
-    return {status: error.response.status, message: error.response.data.message, data: null};
+    return {status: error?.response?.status, message: error?.response?.data?.message, data: null};
   }
 }
 
