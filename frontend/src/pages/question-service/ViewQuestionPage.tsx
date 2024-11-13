@@ -13,7 +13,6 @@ import { Attempt } from "../AttemptedHistoryPage";
 import { parseQuestionId } from "../../lib/utils"
 import { LightAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { darcula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-import Markdown from "react-markdown";
 import CustomMarkdown from "@/components/common/CustomMarkdown";
 
 interface ViewQuestionPageProps {
@@ -28,6 +27,8 @@ interface CodeDisplay {
 export default function ViewQuestionPage({ hasCode = false } : ViewQuestionPageProps) {
   const params = useParams();
   const id = params.id as string;
+  console.log("params: ", params)
+  const timeSubmitted = new Date(params.timeSubmitted!);
   const { auth } = useAuth();
 
   const [question, setQuestion] = useState<Question | null>(null);
@@ -55,14 +56,24 @@ export default function ViewQuestionPage({ hasCode = false } : ViewQuestionPageP
       try {
         const result = await getUserAttempts(auth.id);
         console.log(result.data)
+        console.log(timeSubmitted)
         if (result.status === 200) {
           // Filter the attempts for the specific questionId
-          const matchedAttempt = result.data.find((attempt: Attempt) => attempt.questionId === parseQuestionId(id));
-          console.log("matchedAttempt: ", matchedAttempt)
-          if (matchedAttempt) {
+          const matchedAttempts = result.data
+            .filter((attempt: Attempt) => {
+              console.log("time submitted;", attempt.timeSubmitted)
+              return (attempt.questionId === parseQuestionId(id)) && new Date(attempt.timeSubmitted).getTime() == new Date(timeSubmitted).getTime()
+              
+              })
+            .sort((a: Attempt, b: Attempt) => new Date(b.timeSubmitted).getTime() - new Date(a.timeSubmitted).getTime());
+
+          // Select the latest attempt (first one in sorted array)
+          const latestAttempt = matchedAttempts[0];
+          console.log("matchedAttempt: ", latestAttempt)
+          if (latestAttempt) {
             // If attempt found, set the code
-            console.log("stuff: ", { code: matchedAttempt.code, language: matchedAttempt.language })
-            setAttemptCode({ code: matchedAttempt.code, language: matchedAttempt.language });
+            console.log("stuff: ", { code: latestAttempt.code, language: latestAttempt.language })
+            setAttemptCode({ code: latestAttempt.code, language: latestAttempt.language });
           } else {
             // No matching attempt found for the question
             setAttemptCode(null);
