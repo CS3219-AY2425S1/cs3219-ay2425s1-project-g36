@@ -1,22 +1,27 @@
-import { User, hasCommonDifficulties } from "../model/user";
+// External libraries
 import { Kafka } from "kafkajs";
+import { v4 as uuidv4 } from 'uuid'
+
+// Internal project modules
+import { User, hasCommonDifficulties } from "../model/user";
 import { Queue } from "../model/queue";
 import userStore from "../utils/userStore";
-import { v4 as uuidv4 } from 'uuid'
 import { findCommonDifficulties, findCommonTopics } from "../model/user";
 
 const kafka = new Kafka({
     clientId: 'matching-service',
-    brokers: ['kafka:9092'], // TODO: add to env variables
+    brokers: ['kafka:9092'],    
     retry: {
-        retries: 10,           // Increase the number of retries
+        retries: 10,            // Increase the number of retries
         initialRetryTime: 300,  // Increase initial retry time
-        factor: 2,             // Exponential backoff
+        factor: 2,              // Exponential backoff
     },
 });
 
-// Consumer related functions
-// Separate consumers for matching and confirmation to run them in parallel
+/**
+ * Consumer related functions.
+ * Separate consumers for matching and confirmation to run them in parallel.
+ */
 const matchConsumer = kafka.consumer({ groupId: "matching" });
 const confirmationConsumer = kafka.consumer({ groupId: "confirmation" });
 const producer = kafka.producer();
@@ -35,9 +40,8 @@ export async function initializeConsumer() {
     }
 }
 
-
 /**
- * Find a matching user (among previous users) for a new user based on their topics and difficulties
+ * Find a matching user (among previous users) for a new user based on their topics and difficulties.
  * 
  * @param newUser The new user
  * @param waitingQueue The queue of waiting users
@@ -69,7 +73,7 @@ const findMatchingUser = (newUser: User, waitingQueue: Queue): User | null => {
 }
 
 /**
- * Create a confirmation timeout for the user (6 seconds long)
+ * Create a confirmation timeout for the user (6 seconds long).
  * 
  * @param user The user
  * @param matchedUser The matched user
@@ -130,7 +134,7 @@ export const startMatching = async () => {
 
             // Check if it is a tombstone message
             if (value === 'cancel') {
-                //Remove user from waiting queue if inside
+                // Remove user from waiting queue if inside
                 if (waitingQueue.isUserInQueue(key)) {
                     const user = userStore.getUser(key)!;
                     // Clear the user's timeout, remove from the queue and user store
@@ -200,9 +204,7 @@ export const startMatching = async () => {
             }
         }
     });
-    
 }
-
 
 /**
  * Listens to the user-confirmation topic for user confirmations.
@@ -213,7 +215,6 @@ export const startMatching = async () => {
  * If the other user is not ready, the user waits for the other user to confirm.
  */
 export const startConfirmation = async () => {
-
     confirmationConsumer.subscribe({ topic: 'user-confirmation', fromBeginning: true });
 
     await confirmationConsumer.run({
@@ -270,19 +271,14 @@ export const startConfirmation = async () => {
                 user!.confirmationStatus = 'declined';
                 matchedUser!.confirmationStatus = 'declined';
             }
-
         }
     });
 }
 
-
-
-
 // Producer related functions
 
-
 /**
- * Send a user selection message to the user-selection topic
+ * Send a user selection message to the user-selection topic.
  * 
  * @param user Topics, difficulties, and user token
  * @param isCancel Whether the user wants to stop matching, set to false by default
@@ -302,7 +298,7 @@ export const sendQueueingMessage = async (id: string, isCancel: boolean = false)
 }
 
 /**
- * Send a user confirmation message to the user-confirmation topic
+ * Send a user confirmation message to the user-confirmation topic.
  * 
  * @param user The user
  * @param matchedUser The matched user
@@ -318,7 +314,7 @@ export const sendConfirmationMessage = async (userId: string, matchedUserId: str
 }
 
 /**
- * Send a collaboration message to the collaboration topic
+ * Send a collaboration message to the collaboration topic.
  * 
  * @param user1_id The first user's ID
  * @param user2_id The second user's ID
@@ -326,8 +322,24 @@ export const sendConfirmationMessage = async (userId: string, matchedUserId: str
  * @param question_topics The common topics between the users
  * @param question_difficulties The common difficulties between the users
  */
-export const sendCollaborationMessage = async (user1_id: string, user2_id: string, roomId: string, question_topics: string[], question_difficulties: string[], user1_progLangs: string[], user2_progLangs: string[]) => {
-    if (user1_id === null || user2_id === null || roomId === null || question_topics.length === 0 || question_difficulties.length === 0 || user1_progLangs.length === 0 || user2_progLangs.length === 0) return
+export const sendCollaborationMessage = async (
+    user1_id: string, 
+    user2_id: string, 
+    roomId: string, 
+    question_topics: string[], 
+    question_difficulties: string[], 
+    user1_progLangs: string[], 
+    user2_progLangs: string[]
+) => {
+    if (
+        user1_id === null || 
+        user2_id === null || 
+        roomId === null || 
+        question_topics.length === 0 || 
+        question_difficulties.length === 0 || 
+        user1_progLangs.length === 0 || 
+        user2_progLangs.length === 0
+    ) return
     
     const message = JSON.stringify({
         user1_id,
@@ -345,5 +357,4 @@ export const sendCollaborationMessage = async (user1_id: string, user2_id: strin
             { key: roomId, value: message },
         ],
     });
-
 }
