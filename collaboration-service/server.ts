@@ -111,6 +111,7 @@ io.on("connection", socket => {
             socket.on('send-chat-message-bot', async (
                 questionId : string,
                 progLang : string,
+                codeState : string,
                 chatMessage: {
                     message: string,
                     userId: string
@@ -134,7 +135,7 @@ io.on("connection", socket => {
 
                 // when server receives a chat message from client, the AI bot will come up with
                 // a response, then socket transmits the answer back
-                const aiResponse = await makeReplyToChat(questionId, progLang, botChat._id);
+                const aiResponse = await makeReplyToChat(questionId, progLang, codeState, botChat._id);
                 console.log(aiResponse);
                 socket.emit("receive-chat-message-bot", aiResponse);
             });
