@@ -78,7 +78,7 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
         socket.emit("send-chat-message-bot", questionId, progLang, {message: messageInInputBox, userId: auth.id});
       }
       
-      addChatMessage({message: messageInInputBox, isSelf: true});
+      addChatMessage({message: messageInInputBox, isSelf: true, timestamp: new Date()});
       setMessageInInputBox("");
       window.setTimeout(chatMessageContainerScrollToButtom, 10); // Use a very short delay to give time for the browser to automatically recalculate the container's dimensions
     }
@@ -89,16 +89,16 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
       if (socket === null) return;
       
       if (isBot) {
-        socket.emit("send-chat-message-user", {message: message, userId: auth.id});
+        socket.emit("send-chat-message-user", {message: message, userId: auth.id, timestamp: new Date()});
       
-        onShare({ message: message, isSelf: true });
+        onShare({ message: message, isSelf: true, timestamp: new Date() });
       } else {
         const progLang = codeEditingAreaState.currentlySelectedLanguage.name;
 
         console.log("sent to bot question ID", questionId);
-        socket.emit("send-chat-message-bot", questionId, progLang, {message: message, userId: auth.id});
+        socket.emit("send-chat-message-bot", questionId, progLang, {message: message, userId: auth.id, timestamp: new Date()});
       
-        onShare({ message: message, isSelf: true });
+        onShare({ message: message, isSelf: true, timestamp: new Date() });
       }
 
       toast({
@@ -148,7 +148,7 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
         if (!isBot) {
           socket.once("receive-chat-message-user", (chatMessage : ServerSideChatMessage) => {
               const isSelf = chatMessage.userId === auth.id;
-              addChatMessage({message: chatMessage.message, isSelf: isSelf});
+              addChatMessage({message: chatMessage.message, isSelf: isSelf, timestamp: new Date()});
               
               // Use a very short delay to give time for the browser to automatically recalculate the container's dimensions
               window.setTimeout(calculateShouldDisplayGoToBottomButton, 10); 
@@ -169,7 +169,7 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
           });
         } else {
             socket.once("receive-chat-message-bot", (chatMessage : string) => {
-                addChatMessage({message: chatMessage, isSelf: false});
+                addChatMessage({message: chatMessage, isSelf: false, timestamp: new Date()});
                 
                 // Use a very short delay to give time for the browser to automatically recalculate the container's dimensions
                 window.setTimeout(calculateShouldDisplayGoToBottomButton, 10); 
@@ -203,6 +203,7 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
                     <ChatBubble key={`chat_bubble_${index}`} 
                       text={chatMessage.message}
                       userName={chatMessage.isSelf ? auth.username : otherUserName}
+                      timestamp={chatMessage.timestamp}
                       isSelf={chatMessage.isSelf}
                       isBot={ isBot }
                       onShare={ () => shareChatMessage(chatMessage.message) }
