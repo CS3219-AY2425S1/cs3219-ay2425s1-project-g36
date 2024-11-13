@@ -73,9 +73,10 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
         socket.emit("send-chat-message-user", {message: messageInInputBox, userId: auth.id});
       } else {
         const progLang = codeEditingAreaState.currentlySelectedLanguage.name;
+        const codeState = codeEditingAreaState.rawCode;
 
         console.log("sent to bot question ID", questionId);
-        socket.emit("send-chat-message-bot", questionId, progLang, {message: messageInInputBox, userId: auth.id});
+        socket.emit("send-chat-message-bot", questionId, progLang, codeState, {message: messageInInputBox, userId: auth.id});
       }
       
       addChatMessage({message: messageInInputBox, isSelf: true});
@@ -94,9 +95,10 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
         onShare({ message: message, isSelf: true });
       } else {
         const progLang = codeEditingAreaState.currentlySelectedLanguage.name;
+        const codeState = codeEditingAreaState.rawCode;
 
         console.log("sent to bot question ID", questionId);
-        socket.emit("send-chat-message-bot", questionId, progLang, {message: message, userId: auth.id});
+        socket.emit("send-chat-message-bot", questionId, progLang, codeState, {message: message, userId: auth.id});
       
         onShare({ message: message, isSelf: true });
       }
