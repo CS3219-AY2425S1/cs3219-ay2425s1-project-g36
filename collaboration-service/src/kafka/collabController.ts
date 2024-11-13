@@ -97,7 +97,7 @@ const selectCommonProgLang = (user1_progLang: string[], user2_progLang: string[]
 const getQuestionId = async (question_topics: string[], question_difficulties: string[]): Promise<number | null> => {
     const QUESTION_SERVICE_URL = process.env.NODE_ENV === "development" 
                                 ? "http://question-service-container:3000/"
-                                : "http://localhost:3000/"
+                                : "http://question:3000/"
     const api = axios.create({
         baseURL: QUESTION_SERVICE_URL,
     });
