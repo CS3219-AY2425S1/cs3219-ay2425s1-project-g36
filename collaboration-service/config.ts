@@ -18,6 +18,10 @@ if (!process.env.JDOODLE_CLIENT_SECRET_KEY) {
     );
 }
 
+if (!process.env.NODE_ENV) {
+    process.env.NODE_ENV=""
+}
+
 export const WEBSOCKET_PORT = 3001;
 export const COLLABORATION_SERVICE_PORT = 3002
 export const FRONTEND_PORT = 5173;
