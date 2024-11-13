@@ -31,9 +31,9 @@ export function parseQuestionId(id : string) : number {
 }
 
 /**
- * Formats the timestamp as a string HH:MM(am/pm).
+ * Formats the timestamp as a string DD Mmm YYYY, HH:MM(am/pm).
  * @param timestamp The timestamp to convert to a string.
- * @returns The timestamp, formatted as a string HH:MM(am/pm).
+ * @returns The timestamp, formatted as a string HDD Mmm YYYY, HH:MM(am/pm).
  */
 export function formatTimestampToTimeString(timestamp : string | number | Date) {
   const date = new Date(timestamp);
