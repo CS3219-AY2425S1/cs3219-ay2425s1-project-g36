@@ -18,8 +18,9 @@ type OpenAIMessage = {
 }
 
 const SYSTEM_PROMPT_HEADER = "You are a chatbot that assists users in solving programming questions. You should try to guide the user towards a correct approach for the programming question. You should encourage users to figure out the solution on their own.\n\nThe question is given as follows:\n\n\"\"\"\n";
-const SYSTEM_PROMPT_MIDDLE = "\n\"\"\"\n\nThe users are working with the programming language **";
-const SYSTEM_PROMPT_FOOTER = "**.";
+const SYSTEM_PROMPT_MIDDLE1 = "\n\"\"\"\n\nThe users are working with the programming language **";
+const SYSTEM_PROMPT_MIDDLE2 = "**, with the following code (so far):\n\"\"\"\n";
+const SYSTEM_PROMPT_FOOTER = "\n\"\"\"";
 
 const openai = new OpenAI(); 
 
@@ -30,9 +31,9 @@ const openai = new OpenAI();
  * @param {string} progLang - The programming language relevant to the question.
  * @returns {Promise<string>} - The constructed system prompt.
  */
-async function makeSystemPrompt(questionId : string, progLang : string) {
+async function makeSystemPrompt(questionId : string, progLang : string, codeState : string) {
     const questionDesc = await fetchQuestionById(questionId);
-    return SYSTEM_PROMPT_HEADER + questionDesc + SYSTEM_PROMPT_MIDDLE + progLang + SYSTEM_PROMPT_FOOTER;
+    return SYSTEM_PROMPT_HEADER + questionDesc + SYSTEM_PROMPT_MIDDLE1 + progLang + SYSTEM_PROMPT_MIDDLE2 + codeState + SYSTEM_PROMPT_FOOTER;
 }
 
 /**
@@ -43,8 +44,8 @@ async function makeSystemPrompt(questionId : string, progLang : string) {
  * @param {OpenAIMessage[]} messages - Array of previous messages in the chat.
  * @returns {Promise<string>} - The chatbot's reply content.
  */
-export async function makeReply(questionId : string, progLang : string, messages : OpenAIMessage[]) {
-    const systemPrompt = await makeSystemPrompt(questionId, progLang);
+export async function makeReply(questionId : string, progLang : string, codeState : string, messages : OpenAIMessage[]) {
+    const systemPrompt = await makeSystemPrompt(questionId, progLang, codeState);
     const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
@@ -63,11 +64,12 @@ export async function makeReply(questionId : string, progLang : string, messages
  * 
  * @param questionId The question ID to provide context to the chatbot.
  * @param progLang The programming language to provide context for the chatbot.
+ * @param codeState The current code within the collab session to provide context for the chatbot.
  * @param chatId The ID of the chat that the chatbot should reply to.
  * 
  * @return The OpenAI chatbot reply.
  */
-export async function makeReplyToChat(questionId : string, progLang : string, chatId : string) {
+export async function makeReplyToChat(questionId : string, progLang : string, codeState : string, chatId : string) {
 
     const chat = await ChatModel.findById(chatId);
     
@@ -83,7 +85,7 @@ export async function makeReplyToChat(questionId : string, progLang : string, ch
         }
     }) as OpenAIMessage[];
 
-    const replyMessage = await makeReply(questionId, progLang, openAiMessages);
+    const replyMessage = await makeReply(questionId, progLang, codeState, openAiMessages);
 
     const newMessage = {
         sender: 'PeerPrepBot',
