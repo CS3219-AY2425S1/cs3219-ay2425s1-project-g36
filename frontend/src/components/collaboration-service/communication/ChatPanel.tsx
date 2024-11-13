@@ -115,6 +115,9 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
       if (window.confirm(isBot ? CLEAR_BOT_MSG : CLEAR_USER_MSG)) {
         // clear chat in frontend
         setChatMessages([]);
+              
+        // Use a very short delay to give time for the browser to automatically recalculate the container's dimensions
+        window.setTimeout(calculateShouldDisplayGoToBottomButton, 10); 
 
         // clear chat in backend
         if (socket === null) return;
@@ -176,7 +179,7 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
 
     return isShown ? (
         <>
-          <div className={ "absolute min-w-[325px] left-[50px] bottom-[50px] p-3 border rounded-lg bg-gray-200 pointer-events-auto " + (fullScreenMode ? "w-[90%] h-[90%]" : "w-1/5 h-1/2") }>
+          <div className={ "absolute min-w-[325px] left-[50px] bottom-[50px] p-3 border rounded-lg bg-gray-200 pointer-events-auto " + (fullScreenMode ? "w-[90%] h-[90%]" : "w-[325px] h-1/2") }>
             <div className={ "flex flex-row justify-between items-center w-[calc(100%+1.5rem)] bg-gray-500 -ml-3 -mr-3 -mt-3 rounded-lg" + (fullScreenMode ? " gap-2" : "") }>
               <Button className="bg-red-300 hover:bg-red-200" onClick={() => clearChatMessages()} title="Clear chat messages"><TrashIcon/></Button>
               <Button 
@@ -192,7 +195,7 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
             <div 
               ref={messageContainerRef}
               onScroll={() => calculateShouldDisplayGoToBottomButton()} 
-              className="w-full h-[calc(100%-5.5rem)] overflow-y-auto"
+              className="w-full h-[calc(100%-5.5rem)] overflow-y-auto overflow-x-hidden"
             >
               <div className="flex flex-col">
                 {
@@ -209,7 +212,7 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
               </div>
               {displayGoToBottomButton && 
                 (
-                  <div onClick={() => chatMessageContainerScrollToButtom()} className="sticky bottom-[0%] left-full m-2 bg-blue-500 opacity-50 w-16 h-16 rounded-full cursor-pointer flex justify-center items-center text-white">
+                  <div onClick={() => chatMessageContainerScrollToButtom()} className="sticky bottom-[0%] left-[calc(100%-48px)] m-2 bg-blue-500 opacity-50 w-12 h-12 rounded-full cursor-pointer flex justify-center items-center text-white">
                     <ArrowDownIcon className="w-1/2 h-1/2" />
                   </div>
                 )

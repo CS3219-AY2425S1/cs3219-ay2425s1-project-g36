@@ -6,9 +6,9 @@ import 'katex/dist/katex.min.css' // `rehype-katex` does not import the CSS for 
 /**
  * Renders a Markdown component with math support.
  */
-export default function CustomMarkdown({ children } : { children : string | null | undefined }) {
+export default function CustomMarkdown({ children, cn } : { children : string | null | undefined, cn?: string }) {
     return (
-        <div className="prose">
+        <div className={"prose" + (cn ? (" " + cn) : "")}>
             <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
                 { children }
             </Markdown>

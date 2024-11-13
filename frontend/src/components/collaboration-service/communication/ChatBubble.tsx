@@ -22,16 +22,14 @@ export default function ChatBubble({text, userName, isSelf, isBot, onShare} : {t
         <div className="rounded-full bg-white m-2">
             <PersonIcon className="m-2"/>
         </div>
-        <div className={`mt-3 flex flex-col ${isSelf ? "items-end" : "items-start"}`}>
+        <div className={`mt-3 w-full flex flex-col ${isSelf ? "items-end" : "items-start"}`}>
           <div className={`text-right text-sm flex flex-row ${isSelf ? "flex-row-reverse" : ""} gap-1`}>
             <span>{userName}</span>
             { showShare ? <Link to="#" onClick={ onShare }>Share to { isBot ? "other user" : "PeerPrepBot" }</Link> : <></> }
           </div>
-          <div className={`rounded-lg max-w-full p-2 text-sm overflow-hidden bg-${isSelf ? "green-200" : "white"} break-words text-left`}>
-            <CustomMarkdown>
-              {text}
-            </CustomMarkdown>
-          </div>
+          <CustomMarkdown cn={`rounded-lg max-w-[80%] p-2 text-sm overflow-hidden bg-${isSelf ? "green-200" : "white"} break-words text-left`}>
+            {text}
+          </CustomMarkdown>
         </div>
       </div>
     </>
