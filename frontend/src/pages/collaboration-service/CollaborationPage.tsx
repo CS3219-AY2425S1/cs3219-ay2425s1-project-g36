@@ -156,7 +156,7 @@ export default function CollaborationPage() {
       )
 
       console.log('the result of executing code is: ', run_code_response.output)
-      if (run_code_response.output !== null) {
+      if (run_code_response.output.output !== null) {
         setRunCodeResult(run_code_response.output.output);
       }
 
