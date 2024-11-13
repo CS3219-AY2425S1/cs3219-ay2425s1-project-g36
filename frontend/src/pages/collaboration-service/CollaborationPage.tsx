@@ -127,7 +127,11 @@ export default function CollaborationPage() {
       )
 
       console.log('the result of executing code is: ', run_code_response.output)
-      setRunCodeResult(run_code_response.output.output);
+      if (run_code_response.output.output === null) {
+        setRunCodeResult("")
+      } else {
+        setRunCodeResult(run_code_response.output.output);
+      }
 
       const credits_spent_response = await getCreditsSpent()
       console.log('credits spent today is: ', credits_spent_response.data.used)
@@ -156,7 +160,9 @@ export default function CollaborationPage() {
       )
 
       console.log('the result of executing code is: ', run_code_response.output)
-      if (run_code_response.output.output !== null) {
+      if (run_code_response.output.output === null) {
+        setRunCodeResult("")
+      } else {
         setRunCodeResult(run_code_response.output.output);
       }
 
