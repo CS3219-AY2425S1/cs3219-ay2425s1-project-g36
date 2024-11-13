@@ -36,7 +36,7 @@ export default function TestCaseResults() {
     );
 
     useEffect(() => {
-        setResultArray(runCodeResult !== undefined ? runCodeResult.split("\n") : [DEFAULT_RESULT])
+        setResultArray(runCodeResult !== null ? runCodeResult.split("\n") : [DEFAULT_RESULT])
     }, [runCodeResult])
 
     const testInputs = question.testInputs
