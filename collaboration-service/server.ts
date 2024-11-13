@@ -1,28 +1,28 @@
+// External libraries
+import cors from 'cors';
 import express, { Application, Request, Response } from "express";
-import cors from 'cors'
-import { Server } from "socket.io";
 import mongoose from "mongoose";
 import { MongoServerError } from "mongodb";
-import { DocumentModel, DocumentType } from './src/models/document'
-import { WEBSOCKET_PORT, COLLABORATION_SERVICE_MONGODB_URI, FRONTEND_PORT, COLLABORATION_SERVICE_PORT } from './config'
-import { listenToMatchingService } from './src/kafka/collabController'
-import { makeReplyToChat } from './src/chat/chatbotController'
-import { ChatMessage, ChatModel, ChatType, MessageType } from "./src/models/chat";
-import { ProgrammingLanguage } from './src/models/ProgrammingLanguage'
+import { Server } from "socket.io";
 
-import collabRoutes from './src/routes/collabRoute'
+// Internal project modules
+import { DocumentModel, DocumentType } from './src/models/document';
+import { WEBSOCKET_PORT, COLLABORATION_SERVICE_MONGODB_URI, FRONTEND_PORT, COLLABORATION_SERVICE_PORT } from './config';
+import { listenToMatchingService } from './src/kafka/collabController';
+import { makeReplyToChat } from './src/chat/chatbotController';
+import { ChatMessage, ChatModel, ChatType, MessageType } from "./src/models/chat";
+import { ProgrammingLanguage } from './src/models/ProgrammingLanguage';
+import collabRoutes from './src/routes/collabRoute';
 import { findOrCreateBotChat, findOrCreateChat } from "./src/chat/chatController";
 
 const app: Application = express();
-
-app.use(express.json());
-
 const corsOptions = {
     origin: 'http://localhost:5173',
     optionsSuccessStatus: 200,
     credentials: true
 }
 
+app.use(express.json());
 app.use(cors(corsOptions))
 app.use("/collaboration", collabRoutes);
 
@@ -186,6 +186,12 @@ io.on("connection", socket => {
 
 console.log('Collaboration-service is up - Starting service')
 
+/**
+ * Finds or creates a document in the MongoDB collection.
+ * 
+ * @param {string} id - Unique document ID.
+ * @returns {Promise<DocumentType | null>} - The found or created document.
+ */
 async function findOrCreateDocument(id: string): Promise<DocumentType | null> {
     if (id == null) return null;
 

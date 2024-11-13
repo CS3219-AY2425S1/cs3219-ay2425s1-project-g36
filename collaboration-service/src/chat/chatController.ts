@@ -1,6 +1,16 @@
-import { ChatModel, ChatType, MessageType } from '../models/chat';
+// External libraries
 import { MongoServerError } from "mongodb";
 
+// Internal project modules
+import { ChatModel, ChatType } from '../models/chat';
+
+/**
+ * Retrieves all messages in a specific chat.
+ * 
+ * @param {string} chatId - The unique identifier of the chat.
+ * @returns {Promise<MessageType[]>} - An array of messages in the chat.
+ * @throws Will throw an error if the chat is not found or if a database error occurs.
+ */
 export async function getMessagesInChat(chatId: string) {
     try {
         // Find the chat by its _id
@@ -20,6 +30,7 @@ export async function getMessagesInChat(chatId: string) {
 
 /**
  * Finds or creates a chat between two matched users.
+ * 
  * @param roomId The room ID to create the chat between the two users.
  * @param userId1 The first user in the chat.
  * @param userId2 The second user in the chat.
@@ -52,6 +63,7 @@ export async function findOrCreateChat(roomId : string, userId1: string, userId2
 
 /**
  * Finds or creates a chat between a user and a bot.
+ * 
  * @param roomId The room ID to create the chat in.
  * @param userId The user communicating with the bot.
  * @returns The created or found chat, as a promise (null promise if error)

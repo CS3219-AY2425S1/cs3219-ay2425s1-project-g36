@@ -1,20 +1,39 @@
-import crypto from 'crypto';
-
-import jwt, { JwtPayload } from 'jsonwebtoken';
+// External libraries
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { Request, Response } from 'express';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 
-import User from '../models/userModel';
+// Internal project modules
 import { Blacklist } from '../models/blacklistModel';
 import generateTokenAndSetCookie from '../lib/generateToken';
-import { EMAIL, PASSWORD, JWT_SECRET } from '../../utils/config';
+import User from '../models/userModel';
+import { EMAIL, PASSWORD, JWT_SECRET } from '../../config';
 
 const MAX_FAILED_ATTEMPTS = 5; 
 const CAPTCHA_REQUIRED_ATTEMPTS = 3; 
 
+/**
+ * Authenticates the user with email and password.
+ * 
+ * Endpoint: POST /login
+ * Access: Public
+ * 
+ * @param {Request} req - The request object containing:
+ *   - `email` (string in body): The user's email address.
+ *   - `password` (string in body): The user's password.
+ * @param {Response} res - The response object.
+ * 
+ * @returns {Promise<Response>} - Returns a JSON response:
+ *   - 200: On successful login, resets failed login attempts, sets the JWT token cookie, and returns user data.
+ *   - 400: If the email or password is incorrect or the user is not found.
+ *   - 500: For unknown server errors.
+ */
 export async function login(req: Request, res: Response) {
     const { email, password } = req.body;
+
+    // Find the user by email
     const user = await User.findOne({ email })
     if (!user) return res.status(400).json({ message: 'User not found' })
 
@@ -39,40 +58,57 @@ export async function login(req: Request, res: Response) {
     }
     */
 
-    // Check if password is correct
+    // Compare provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
         return res.status(400).json({ message: 'Invalid Credentials' })
     }
 
-    //Reset failed attempts once login is successful
+    // Reset failed attempts once login is successful
     user.numberOfFailedLoginAttempts = 0;
     await user.save();
 
+    // Generate a JWT token and set it in a cookie
     generateTokenAndSetCookie(user.id, res);
-    res.json({ message: 'Login successful', id: user.id, username: user.username, email: user.email, isAdmin: user.isAdmin });
+    return res.status(200).json({ message: 'Login successful', id: user.id, username: user.username, email: user.email, isAdmin: user.isAdmin });
 }
 
+/**
+ * Sends a password reset link to the user's email.
+ * 
+ * Endpoint: POST /forgot-password
+ * Access: Public
+ * 
+ * @param {Request} req - The request object containing:
+ *   - `email` (string in body): The user's email address.
+ * @param {Response} res - The response object.
+ * 
+ * @returns {Promise<Response>} - Returns a JSON response:
+ *   - 200: Sends the reset link to the user's email.
+ *   - 404: If the email is not found.
+ *   - 500: For errors during email sending or server issues.
+ */
 export async function forgotPassword(req: Request, res: Response) {
     const { email } = req.body;
 
-    // Check if user exists
+    // Find the user by email
     const user = await User.findOne({ email });
     if (!user) {
         return res.status(404).json({ message: 'User with this email does not exist' });
     }
 
-    // Generate reset token
+    // Generate a password reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
 
-    // Hash the reset token and set an expiration time 
+    // Hash the reset token and set an expiration time (15 minutes)
     const resetTokenHashed = crypto.createHash('sha256').update(resetToken).digest('hex');
     user.passwordResetToken = resetTokenHashed;
     user.passwordResetTokenExpiration = new Date(Date.now() + 900000); // Token valid for 15 mins (in miliseconds)
     await user.save();
 
-    // Send email 
+    // Prepare the reset URL to be sent in the email
     const resetURL = `${req.get('Referer')}reset-password/${resetToken}`;
+    // Configure email settings and send the email
     const transporter = nodemailer.createTransport({ 
         service: 'gmail',
         auth: {
@@ -90,7 +126,7 @@ export async function forgotPassword(req: Request, res: Response) {
 
     try {
         await transporter.sendMail(mailOptions);
-        res.json({ message: 'Password reset link sent to email!' });
+        return res.status(200).json({ message: 'Password reset link sent to email!' });
     } catch (error) {
         user.passwordResetToken = undefined;
         user.passwordResetTokenExpiration = undefined;
@@ -99,10 +135,24 @@ export async function forgotPassword(req: Request, res: Response) {
     }
 }
 
+/**
+ * Verifies the password reset token and retrieves the user's email and username.
+ * 
+ * Endpoint: GET /reset-password/:token
+ * Access: Public
+ * 
+ * @param {Request} req - The request object containing:
+ *   - `token` (string in URL): The reset token from the URL.
+ * @param {Response} res - The response object.
+ * 
+ * @returns {Promise<Response>} - Returns a JSON response:
+ *   - 200: If token is valid, returns user data.
+ *   - 400: If token is invalid or expired.
+ */
 export async function getUserFromToken(req: Request, res: Response) {
     const { token } = req.params;
     
-    // Hash the token and find the user
+    // Hash the token and look for a matching user with a valid token
     const hashedResetToken = crypto.createHash('sha256').update(token).digest('hex');
     const user = await User.findOne({ 
         passwordResetToken: hashedResetToken, 
@@ -116,11 +166,26 @@ export async function getUserFromToken(req: Request, res: Response) {
     }
 }
 
+/**
+ * Resets the user's password.
+ * 
+ * Endpoint: POST /reset-password/:token
+ * Access: Public
+ * 
+ * @param {Request} req - The request object containing:
+ *   - `token` (string in URL): The reset token.
+ *   - `password` (string in body): The new password to set.
+ * @param {Response} res - The response object.
+ * 
+ * @returns {Promise<Response>} - Returns a JSON response:
+ *   - 200: On successful password reset.
+ *   - 400: If token is invalid or expired.
+ */
 export async function resetPassword(req: Request, res: Response) {
     const { token } = req.params;
     const { password } = req.body;
 
-    // Hash the token and find the user
+    // Hash the token and look for a matching user with a valid token
     const hashedResetToken = crypto.createHash('sha256').update(token).digest('hex');
     const user = await User.findOne({ 
         passwordResetToken: hashedResetToken, 
@@ -131,23 +196,35 @@ export async function resetPassword(req: Request, res: Response) {
         return res.status(400).json({ message: 'Invalid or expired token' });
     }
 
-    // Set new password
+    // Set the new password, hash it, and remove the reset token fields
     user.password = await bcrypt.hash(password, 10);
     user.passwordResetToken = undefined;
     user.passwordResetTokenExpiration = undefined;
     await user.save();
 
-    res.json({ message: 'Password reset successful' });
+    return res.status(200).json({ message: 'Password reset successful' });
 }
 
+/**
+ * Logs out the user by blacklisting the JWT and clearing the cookie.
+ * 
+ * Endpoint: POST /logout
+ * 
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * 
+ * @returns {Promise<Response>} - Returns a JSON response:
+ *   - 200: On successful logout.
+ *   - 400: If no token is provided or if it’s already blacklisted.
+ */
 export async function logout(req: Request, res: Response) {
-    // const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is passed in the Authorization header
-    const token = req.cookies.jwt; // Get token from the cookie
+    // Retrieve the JWT token from the cookies
+    const token = req.cookies.jwt; 
     if (!token) {
         return res.status(400).json({ message: 'No token provided' });
     }
 
-    // Decode the token to get the expiration
+    // Decode and validate the token
     let expiresAt = null
     try {
         const decodedToken = jwt.verify(token, JWT_SECRET)
@@ -163,7 +240,7 @@ export async function logout(req: Request, res: Response) {
         return res.status(400).json({ message: 'Invalid token' })
     }
 
-    // Check if the token already exists in the blacklist
+    // Check if the token is already blacklisted
     const existingToken = await Blacklist.findOne({ token });
     if (existingToken) {
         return res.status(400).json({ message: 'Token already blacklisted' });
@@ -172,7 +249,7 @@ export async function logout(req: Request, res: Response) {
     // Add the token to the blacklist
     await Blacklist.create({ token, expiresAt })
 
-    // Remove JWT token cookie upon logout (as added measure)
+    // Clear the JWT cookie to complete logout
     res.cookie('jwt', '', { 
         httpOnly: true, 
 		secure: process.env.NODE_ENV !== "development", 
@@ -181,6 +258,5 @@ export async function logout(req: Request, res: Response) {
     });
 
     //TODO: clean up session data
-
-    res.json({ message: 'Logout successful' });
+    return res.status(200).json({ message: 'Logout successful' });
 }

@@ -1,11 +1,22 @@
-import { Router, Request, Response } from "express";
-import collabStore from '../utils/collabStore'
+// External libraries
 import axios from "axios";
+import { Router, Request, Response } from "express";
+
+// Internal project modules
+import collabStore from '../utils/collabStore'
 import { JDOODLE_CLIENT_ID, JDOODLE_CLIENT_SECRET_KEY } from "../../config";
 
 const router = Router()
 
-// Retrieves the information of the collaboration
+/**
+ * Retrieves collaboration information for a specific user.
+ * 
+ * @route GET /:id
+ * @param {string} id - User ID to retrieve collaboration details.
+ * @returns {Response} 200 - Collaboration data found for user.
+ * @returns {Response} 400 - Missing user ID in URL.
+ * @returns {Response} 404 - User not found in collabStore.
+ */
 router.get("/:id", (req: Request, res: Response): any => {
     const id = req.params.id;
     if (id === null) {
@@ -28,7 +39,15 @@ router.get("/:id", (req: Request, res: Response): any => {
     })
 }); 
 
-// Removes user from collabStore
+/**
+ * Removes a user from the collabStore.
+ * 
+ * @route POST /remove/:id
+ * @param {string} id - User ID to remove from collabStore.
+ * @returns {Response} 200 - User removed successfully.
+ * @returns {Response} 400 - Missing user ID in URL.
+ * @returns {Response} 404 - User not found in collabStore.
+ */
 router.post("/remove/:id", (req: Request, res, Response): any => {
     const id = req.params.id;
     if (id === null) {
@@ -52,7 +71,15 @@ router.post("/remove/:id", (req: Request, res, Response): any => {
     })
 })
 
-// Checks if user is in collabStore
+/**
+ * Checks if a user is in the collabStore.
+ * 
+ * @route GET /in-store/:id
+ * @param {string} id - User ID to check in collabStore.
+ * @returns {Response} 200 - User is in collabStore.
+ * @returns {Response} 400 - Missing user ID in URL.
+ * @returns {Response} 404 - User not found in collabStore.
+ */
 router.get("/in-store/:id", (req: Request, res: Response): any => {
     const id = req.params.id;
 
@@ -74,7 +101,16 @@ router.get("/in-store/:id", (req: Request, res: Response): any => {
     })
 }); 
 
-// update prog lang in collab store
+/**
+ * Updates the programming language for a user in the collabStore.
+ * 
+ * @route PUT /:id
+ * @param {string} id - User ID to update.
+ * @param {string} progLang - New programming language.
+ * @returns {Response} 200 - User's programming language updated.
+ * @returns {Response} 400 - Missing user ID in URL.
+ * @returns {Response} 404 - User not found in collabStore.
+ */
 router.put("/:id", (req: Request, res: Response): any => {
     const id = req.params.id;
     const { progLang } = req.body
@@ -103,7 +139,17 @@ router.put("/:id", (req: Request, res: Response): any => {
     })
 }); 
 
-// Sends API request to JDoodle to execute code in a sandboxed environment
+/**
+ * Sends an API request to JDoodle to execute code in a sandboxed environment.
+ * 
+ * @route POST /run-code
+ * @param {string} script - Code script to execute.
+ * @param {string} stdin - Input for the code.
+ * @param {string} language - Programming language.
+ * @param {string} versionIndex - Version index of the language.
+ * @returns {Response} 200 - Execution result from JDoodle.
+ * @returns {Response} 500 - Internal server error or JDoodle error.
+ */
 router.post("/run-code", async (req: Request, res: Response): Promise<void> => {
     try {
         const { script, stdin, language, versionIndex } = req.body;
@@ -128,8 +174,14 @@ router.post("/run-code", async (req: Request, res: Response): Promise<void> => {
     }
 })
 
-// Checks how many API calls to JDoodle you have made today
-// Note that in one day, you can make max 20 calls. Resets at Singapore time 0800
+/**
+ * Checks the number of API calls made to JDoodle today.
+ * JDoodle allows a maximum of 20 calls per day, reset at Singapore time 0800.
+ * 
+ * @route POST /check-credits-spent
+ * @returns {Response} 200 - JDoodle credit usage data.
+ * @returns {Response} 500 - Internal server error or JDoodle error.
+ */
 router.post('/check-credits-spent', async (req: Request, res: Response) => {
     const requestBody = {
         clientId: JDOODLE_CLIENT_ID,

@@ -1,13 +1,22 @@
+// External libraries
 import { Router, Request, Response } from "express";
+
+// Internal project modules
 import { Question } from "../models/questionModel";
-import { parseQuestionId } from "../utils/parseQuestionId";
 import QUESTION_TOPICS from "../models/questionTopics";
+import { parseQuestionId } from "../utils/parseQuestionId";
 
 const router: Router = Router();
 
 const DUPLICATE_KEY_ERROR_CODE = 11000;
 
-// retrieves entire list of questions
+/**
+ * GET: Retrieve all questions.
+ * 
+ * @route GET /
+ * @returns {Response} 200 - An array of questions sorted by ID.
+ * @returns {Response} 500 - Internal server error.
+ */
 router.get("/", async (req: Request, res: Response): Promise<Response> => {
     try {
         const questions = await Question.find({}).sort({ _id: 1 });
@@ -24,7 +33,12 @@ router.get("/", async (req: Request, res: Response): Promise<Response> => {
     }
 });
 
-// retrieves all unique topics from all questions
+/**
+ * GET: Retrieve all unique topics from the list of questions.
+ * 
+ * @route GET /topics
+ * @returns {Response} 200 - An array of unique topics.
+ */
 router.get(
     "/topics",
     async (req: Request, res: Response): Promise<Response> => {
@@ -32,7 +46,16 @@ router.get(
     }
 );
 
-// retrieves a specific question by id
+/**
+ * GET: Retrieve a specific question by ID.
+ * 
+ * @route GET /:id
+ * @param {string} id - The unique identifier of the question.
+ * @returns {Response} 200 - The question object.
+ * @returns {Response} 400 - Invalid ID error.
+ * @returns {Response} 404 - Question not found.
+ * @returns {Response} 500 - Internal server error.
+ */
 router.get("/:id", async (req: Request, res: Response): Promise<Response> => {
     const id = parseQuestionId(req.params.id);
 
@@ -59,7 +82,16 @@ router.get("/:id", async (req: Request, res: Response): Promise<Response> => {
     }
 });
 
-// Retrieve a question randomly based on difficulty and topic
+/**
+ * POST: Retrieve a random question based on specified difficulty and topic.
+ * 
+ * @route POST /filter
+ * @param {string[]} difficulties - An array of difficulty levels to filter by.
+ * @param {string[]} topics - An array of topics to filter by.
+ * @returns {Response} 200 - Randomly selected question ID matching criteria.
+ * @returns {Response} 404 - No questions found for the criteria.
+ * @returns {Response} 500 - Internal server error.
+ */
 router.post('/filter', async (req: Request, res: Response) => {
     const { difficulties, topics } = req.body;
 
@@ -90,7 +122,15 @@ router.post('/filter', async (req: Request, res: Response) => {
     }
 });
 
-// create a question
+/**
+ * POST: Create a new question.
+ * 
+ * @route POST /
+ * @param {Object} question - Question data including title, difficulty, description, and topics.
+ * @returns {Response} 200 - Question successfully created.
+ * @returns {Response} 400 - Validation error or duplicate question title.
+ * @returns {Response} 500 - Internal server error.
+ */
 router.post("/", async (req: Request, res: Response): Promise<Response> => {
     const question = req.body;
     if (!question.title || !question.difficulty || !question.description) {
@@ -129,7 +169,17 @@ router.post("/", async (req: Request, res: Response): Promise<Response> => {
     }
 });
 
-// updates a question, identifed by id
+/**
+ * PUT: Update a question identified by ID.
+ * 
+ * @route PUT /:id
+ * @param {string} id - The unique identifier of the question.
+ * @param {Object} question - Updated question data.
+ * @returns {Response} 200 - Question successfully updated.
+ * @returns {Response} 400 - Validation error or invalid ID.
+ * @returns {Response} 404 - Question not found.
+ * @returns {Response} 500 - Internal server error.
+ */
 router.put("/:id", async (req: Request, res: Response): Promise<Response> => {
     const id = parseQuestionId(req.params.id);
     const question = req.body;
@@ -183,7 +233,16 @@ router.put("/:id", async (req: Request, res: Response): Promise<Response> => {
     }
 });
 
-// deletes a specific question by id
+/**
+ * DELETE: Deletes a specific question by ID.
+ * 
+ * @route DELETE /:id
+ * @param {string} id - The unique identifier of the question.
+ * @returns {Response} 200 - Question successfully deleted.
+ * @returns {Response} 400 - Invalid ID error.
+ * @returns {Response} 404 - Question not found.
+ * @returns {Response} 500 - Internal server error.
+ */
 router.delete("/:id", async (req: Request, res: Response): Promise<Response> => {
     const id = parseQuestionId(req.params.id);
 

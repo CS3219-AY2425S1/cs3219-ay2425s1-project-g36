@@ -1,6 +1,12 @@
 import mongoose, { Document } from "mongoose"
-import AttemptHistory, { attemptHistorySchema, IAttemptHistory } from "./attemptHistoryModel";
 
+import { attemptHistorySchema, IAttemptHistory } from "./attemptHistoryModel";
+
+/**
+ * Interface for the User model, extending Mongoose's Document.
+ * This interface defines the shape of a User document in the MongoDB collection
+ * and helps TypeScript with type-checking and autocompletion.
+ */
 interface IUser extends Document {
     username: string
     email: string
@@ -11,9 +17,12 @@ interface IUser extends Document {
     passwordResetTokenExpiration?: Date
     isAdmin: boolean
     attemptHistory: IAttemptHistory[]
-    // Add more fields as needed
 }
 
+/**
+ * Mongoose schema for the User model.
+ * Defines the structure, data types, and validation for each field.
+ */
 const userSchema = new mongoose.Schema(
     {
         username: {
@@ -59,5 +68,10 @@ const userSchema = new mongoose.Schema(
         timestamps: true,
     }
 )
+
+/**
+ * User Model
+ * This is the model that interacts with the MongoDB 'User' collection.
+ */
 const User = mongoose.model<IUser>('User', userSchema)
 export default User;

@@ -1,10 +1,10 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "dev": "nodemon --exec ts-node src/index.ts",
+    "start": "ts-node src/server.ts",
+    "dev": "nodemon --exec ts-node src/server.ts",
     "docker-build-image": "docker build -t question-service-image .",
     "docker-create-container": "docker run -d -p 3000:3000 --name question-service question-service-image",
     "docker-start": "docker start question-service",

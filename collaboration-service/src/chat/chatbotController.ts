@@ -1,7 +1,9 @@
-import OpenAI from "openai";
-import { ChatMessage, ChatModel, MessageType } from "../models/chat";
+// External libraries
 import axios from "axios";
-import { getMessagesInChat } from "./chatController";
+import OpenAI from "openai";
+
+// Internal project modules
+import { ChatModel, MessageType } from "../models/chat";
 
 /**
  * Implementation of an AI chatbot as a controller to allow users to seek for help
@@ -22,11 +24,26 @@ const SYSTEM_PROMPT_FOOTER = "\n\"\"\"";
 
 const openai = new OpenAI(); 
 
+/**
+ * Constructs a system prompt for the chatbot based on the question ID and programming language.
+ *
+ * @param {string} questionId - The ID of the question to provide context.
+ * @param {string} progLang - The programming language relevant to the question.
+ * @returns {Promise<string>} - The constructed system prompt.
+ */
 async function makeSystemPrompt(questionId : string, progLang : string, codeState : string) {
     const questionDesc = await fetchQuestionById(questionId);
     return SYSTEM_PROMPT_HEADER + questionDesc + SYSTEM_PROMPT_MIDDLE1 + progLang + SYSTEM_PROMPT_MIDDLE2 + codeState + SYSTEM_PROMPT_FOOTER;
 }
 
+/**
+ * Generates a reply from the OpenAI chatbot.
+ *
+ * @param {string} questionId - The question ID to provide context for the chatbot.
+ * @param {string} progLang - The programming language to provide context.
+ * @param {OpenAIMessage[]} messages - Array of previous messages in the chat.
+ * @returns {Promise<string>} - The chatbot's reply content.
+ */
 export async function makeReply(questionId : string, progLang : string, codeState : string, messages : OpenAIMessage[]) {
     const systemPrompt = await makeSystemPrompt(questionId, progLang, codeState);
     const completion = await openai.chat.completions.create({
@@ -82,6 +99,12 @@ export async function makeReplyToChat(questionId : string, progLang : string, co
     return replyMessage;
 }
 
+/**
+ * Fetches the description of a question by its ID from the question service.
+ *
+ * @param {string} id - The ID of the question.
+ * @returns {Promise<string>} - The question description or an error message if fetch fails.
+ */
 const fetchQuestionById = async (id? : string): Promise<string> => {
     const QUESTION_SERVICE_URL = "http://question-service-container:3000/";
     const api = axios.create({
