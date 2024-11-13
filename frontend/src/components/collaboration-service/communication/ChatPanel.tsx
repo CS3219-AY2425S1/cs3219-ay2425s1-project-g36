@@ -165,6 +165,9 @@ export default function ChatPanel({ chatMessages, setChatMessages, onShare, othe
             toast({
               description: "Your collaboration partner has requested to clear their chat log with you. Your chat log has been cleared."
             });
+
+            // clear go to bottom button (else it doesn't remove the button when closed)
+            setDisplayGoToBottomButton(false);
               
             // Use a very short delay to give time for the browser to automatically recalculate the container's dimensions
             window.setTimeout(calculateShouldDisplayGoToBottomButton, 10); 
