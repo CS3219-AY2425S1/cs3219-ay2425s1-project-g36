@@ -23,7 +23,7 @@ spec:
         io.kompose.service: matching
     spec:
       containers:
-        - image: jayee230/cs3219-matching:v1.1
+        - image: jayee230/cs3219-matching:v2.0
           name: matching-service-container
           resources:
             requests:
