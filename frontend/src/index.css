@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* add any additional CSS styling (affects the whole app) here */
+a:not(button a):not(nav a):not(div[role="menuitem"] a):not(#peerprep-header) {
+  @apply underline text-blue-600 hover:text-blue-800 visited:text-purple-600
+}
+
+/* custom styling for black background, white foreground buttons in UI */
+.btnblack {
+  @apply bg-black hover:bg-gray-800 text-white hover:text-gray-100 !important;
+}
+
+/* custom styling for grey background, white foreground buttons in UI */
+.btngray {
+  @apply bg-gray-800 hover:bg-gray-600 text-white hover:text-gray-100 !important;
+}
+
+/* custom styling for green background, white foreground buttons in UI */
+.btngreen {
+  @apply bg-green-500 hover:bg-green-500/85 text-white hover:text-gray-100 !important;
+}
+
+/* custom styling for red background, white foreground buttons in UI */
+.btnred {
+  @apply bg-red-500 hover:bg-red-500/85 text-white hover:text-gray-100 !important;
+}

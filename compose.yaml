@@ -1,0 +1,94 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "${ZOOKEEPER_PORT:-2181}:2181"
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka:9092"]
+      interval: 10s
+      retries: 10
+    ports:
+      - "${KAFKA_PORT:-9092}:9092"
+
+  frontend:
+    build:
+      context:
+        ./frontend
+    volumes:
+      - ./frontend:/usr/src/frontend
+      - /usr/src/frontend/node_modules
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    container_name: frontend-container
+    environment:
+      - WDS_SOCKET_HOST=127.0.0.1
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true 
+    command: yarn dev --host 0.0.0.0
+  user:
+    restart: always
+    build:
+      context:
+        ./user-service
+    volumes:
+      - ./user-service:/usr/src/user-service
+      - /usr/src/user-service/node_modules
+    ports:
+      - "${USERSVC_PORT:-4000}:4000"
+    container_name: user-service-container
+  question:
+    restart: always
+    build:
+      context:
+        ./question-service
+    volumes:
+      - ./question-service:/usr/src/question-service
+      - /usr/src/question-service/node_modules
+    ports:
+      - "${QUESTIONSVC_PORT:-3000}:3000"
+    container_name: question-service-container
+  collaboration:
+    restart: always
+    build:
+      context:
+        ./collaboration-service
+    volumes:
+      - ./collaboration-service:/usr/src/collaboration-service
+      - /usr/src/collaboration-service/node_modules
+    ports:
+      - "${COLLABORATIONSVC_PORT:-3001}:3001" # WebSocket server
+      - "${COLLABORATION_API_PORT:-3002}:3002"  # REST API server
+    container_name: collaboration-service-container
+  matching:
+    restart: always
+    build:
+      context:
+        ./matching-service
+    volumes:
+      - ./matching-service:/usr/src/matching-service
+      - /usr/src/matching-service/node_modules
+    depends_on:
+      - zookeeper
+    ports:
+      - "${MATCHINGSVC_PORT:-5000}:5000"
+    container_name: matching-service-container

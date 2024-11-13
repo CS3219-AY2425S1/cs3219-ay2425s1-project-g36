@@ -1,0 +1,38 @@
+{
+    "name": "matching-service-backend",
+    "version": "1.0.0",
+    "main": "src/main.ts",
+    "scripts": {
+        "start": "ts-node src/main.ts",
+        "dev": "nodemon --exec ts-node src/server.ts",
+        "docker-build-image": "docker build -t matching-service-image .",
+        "docker-create-container": "docker run -d -p 5000:5000 --name matching-service matching-service-image",
+        "docker-start": "docker start matching-service",
+        "docker-stop": "docker stop matching-service"
+    },
+    "prettier": {
+        "tabWidth": 4
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/node": "^22.6.1",
+        "@types/uuid": "^10.0.0",
+        "nodemon": "^3.1.7",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.2"
+    },
+    "dependencies": {
+        "@types/cookie-parser": "^1.4.7",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.21.0",
+        "kafkajs": "^2.2.4",
+        "uuid": "^10.0.0"
+    }
+}
