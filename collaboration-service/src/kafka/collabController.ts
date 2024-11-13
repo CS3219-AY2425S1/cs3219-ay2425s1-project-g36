@@ -1,6 +1,8 @@
-import { Kafka } from "kafkajs"
+// External libraries
 import axios from 'axios'; 
+import { Kafka } from "kafkajs"
 
+// Internal project modules
 import collabStore from '../utils/collabStore'
 
 const DEFAULT_QUESTION_ID = 75;
@@ -16,9 +18,11 @@ const kafka = new Kafka({
 
 const consumer = kafka.consumer({ groupId: "collaboration-service-group" });
 
-// This function runs whenever collaboration-service runs.
-// Listens to a '2 users have matched' event. Update collabStore.
-// collabStore is a single source of truth to give all the information regarding a user's collaboration details.
+/**
+ * This function runs whenever collaboration-service runs. 
+ * Listens to a '2 users have matched' event. Update collabStore.
+ * CollabStore is a single source of truth to give all the information regarding a user's collaboration details.
+ */ 
 export const listenToMatchingService = async () => {
     await consumer.connect();
     await consumer.subscribe({ topic: "collaboration", fromBeginning: true });
@@ -34,7 +38,7 @@ export const listenToMatchingService = async () => {
             const roomId = body.roomId
 
             // Selects a random common programming language
-            // matchingController guarantees that the 2 users will have at least 1 common progLang
+            // MatchingController guarantees that the 2 users will have at least 1 common progLang
             const selectedProgLang: string = selectCommonProgLang(body.user1_progLangs, body.user2_progLangs)
 
             // Based on the topics and difficulties, query database and retrieve a question
@@ -47,7 +51,7 @@ export const listenToMatchingService = async () => {
                 selectedQuestionId = DEFAULT_QUESTION_ID;
             } 
 
-            // at this point, update the collab store, which is a local data structure
+            // At this point, update the collab store, which is a local data structure
             collabStore.addUser(user1_id, {
                 userId : user1_id,
                 matchedUserId: user2_id,
@@ -63,19 +67,33 @@ export const listenToMatchingService = async () => {
                 progLang: selectedProgLang
             })
             
-            // nice way to view the contents of collab store
+            // Nice way to view the contents of collab store
             console.log("printing contents of collab store")
             collabStore.printContents()
         }
     })
 }
 
+/**
+ * Selects a common programming language shared between two users.
+ * 
+ * @param {string[]} user1_progLangs - List of programming languages for the first user.
+ * @param {string[]} user2_progLangs - List of programming languages for the second user.
+ * @returns {string} - A randomly selected programming language common to both users.
+ */
 const selectCommonProgLang = (user1_progLang: string[], user2_progLang: string[]) => {
     const commonProgLangs = user1_progLang.filter(lang => user2_progLang.includes(lang))
     const selectedProgLang = commonProgLangs[Math.floor(Math.random() * commonProgLangs.length)] 
     return selectedProgLang
 }
 
+/**
+ * Fetches a question ID from the question service based on the given topics and difficulties.
+ * 
+ * @param {string[]} question_topics - List of topics to filter questions by.
+ * @param {string[]} question_difficulties - List of difficulties to filter questions by.
+ * @returns {Promise<number | null>} - A question ID if found, otherwise null.
+ */
 const getQuestionId = async (question_topics: string[], question_difficulties: string[]): Promise<number | null> => {
     const QUESTION_SERVICE_URL = "http://question-service-container:3000/";
     const api = axios.create({
