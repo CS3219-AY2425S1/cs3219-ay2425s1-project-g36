@@ -41,7 +41,7 @@ export default function StartMatchingForm() {
     checkIfUserInStore()
   }, [])
 
-  const startMatching = () : void => {
+  const startMatching = async () => {
     if(!selectedDifficultyData.easy && !selectedDifficultyData.medium && !selectedDifficultyData.hard) {
       displayError("You must select at least one difficulty.");
       return;
@@ -58,23 +58,26 @@ export default function StartMatchingForm() {
     const difficultiesStr = Object.entries(selectedDifficultyData).filter(val => val[1]).map(val => val[0]).join(", ");
     const topicsStr = questionTopics.join(", ");
     const progLangsStr = progLangs.join(", ");
+    
+    try {
+      const response = await sendStartMatchingRequest(auth.id, auth.email, selectedDifficultyData, questionTopics, progLangs)
+      const httpStatus = response.status;
+      const errorMessage = response.message
+
+      // this httpStatus tells us if user is sent to waitingQueue or not
+      if (httpStatus === HTTP_OK) {
+        // Do nothing here
+      } else if (httpStatus === HTTP_ALREADY_EXISTS || httpStatus === HTTP_ERROR) {
+        navigate(`/matching/failed?message=${errorMessage}&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
+      } else {
+        displayError("An error has occured: \n" + response.message);
+      }
+    } catch (error) {
+      console.error(error)
+    }
+    
     navigate(`../matching/wait?difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
 
-    sendStartMatchingRequest(auth.id, auth.email, selectedDifficultyData, questionTopics, progLangs).then(
-      response => {
-        const httpStatus = response.status;
-        const errorMessage = response.message
-
-        // this httpStatus tells us if user is sent to waitingQueue or not
-        if (httpStatus === HTTP_OK) {
-          // Do nothing here
-        } else if (httpStatus === HTTP_ALREADY_EXISTS || httpStatus === HTTP_ERROR) {
-          navigate(`/matching/failed?message=${errorMessage}&difficulties=${difficultiesStr}&topics=${topicsStr}&progLangs=${progLangsStr}`);
-        } else {
-          displayError("An error has occured: \n" + response.message);
-        }
-      }
-    )
   }
 
   const displayError = (message : string) => {
